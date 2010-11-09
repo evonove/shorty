@@ -1,0 +1,18 @@
+{% extend "base.html" %}
+{% block title %}Titolo{% endblock %}
+{% block content %}
+
+{% for listaurl in greetings %}
+       
+      <blockquote>{{ listaurl.content}}</blockquote>
+    {% endfor %}
+
+    <form action="/sign" method="post">
+      <div><textarea name="content" rows="3" cols="60"></textarea></div>
+      <div><input type="submit" value="Sign Guestbook"></div>
+    </form>
+
+
+
+
+{% endblock %}
