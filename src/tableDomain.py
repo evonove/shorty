@@ -12,24 +12,64 @@ class DomainTable (db.Model):
     counterFrist = db.IntegerProperty()
     counterSecond = db.IntegerProperty()
 
-    def WriteAssociation(self,domain,separator,frist,second):
+    def WriteAssociation(self,domain):
+        #attenzione se ho già il dominio devo solo aggiornare
+        
         self.domain = domain
-        self.counterSeparator = separator
-        self.counterFrist = frist
-        self.counterSecond = second
-        self.put()  
+        index=self.ReadAssociation(domain)
+        if (index[0]==0 and index[1]== 0 and index[2]==1):
+            self.counterSeparator = index[0]
+            self.counterFrist = index[1]
+            self.counterSecond = index[2]
+            self.put()
+        else:
+            index=self.IncrementalIndex(index)
+            self.UpdateDomain(domain,index)
+        #self.counterSeparator = separator
+        #self.counterFrist = frist
+        #self.counterSecond = second
+          
+        
+    
+      
+    def UpdateDomain(self,domain,index):
+        q = db.GqlQuery("UPDATE DomainTable set counterSeparator:=1,counterFrist:=2,counterSecond:=3"+ 
+                        "WHERE domain=:4 ",index[0],index[1],index[2],domain)
+        
+    def CancelAssociation(self,domain):
+        indici=[]     
+        index=self.ReadAssociation(domain)
+        index=self.DecrementalIndex(index)
+        self.UpdateDomain(domain,index)
         
     def ReadAssociation(self,dominio):
         
-        q = db.GqlQuery("SELECT * FROM DomainTable WHERE domain=:1 ORDER BY counterSeparator,counterFrist,counterSecond ",dominio)
-        results = q.fetch(10)
-        indici=[0]
-        for result in results:
-            indici.insert(0,result.counterSeparator)
-            indici.insert(1,result.counterFrist)
-            indici.insert(2,result.counterSecond)   
+        #se e' la prima occorre una strating hand
+        #q2=db.GqlQuery("SELECT COUNT FROM DomainTable WHERE domain=:1",dominio)
+        #res = q2.fetch(10)
+        #for i in res :
+        #    print i
         
-        return indici 
+        
+        q = db.GqlQuery("SELECT * FROM DomainTable WHERE domain=:1 ORDER BY counterSeparator,counterFrist,counterSecond ",dominio)
+        
+        indici=[]
+        results = q.fetch(10)
+        
+        if len(results)==0:
+            indici.insert(0,0)
+            indici.insert(1,1)
+            indici.insert(2,2)
+        else:
+            for result in results:
+                indici.insert(0,result.counterSeparator)
+                indici.insert(1,result.counterFrist)
+                indici.insert(2,result.counterSecond)   
+        
+        return indici
+    
+    
+     
     
     def IncrementalIndex(self,index):
         index[2]=index[2]+1
@@ -57,12 +97,12 @@ class DomainTable (db.Model):
     
 def main():
     domain_table=DomainTable()
-    #domain_table.WriteAssociation("bbbbb",1,1,1)
+    domain_table.WriteAssociation("libero")
     #domain_table.WriteAssociation("aaaaa",1,1,2)
     #domain_table.WriteAssociation("ccccc",1,1,3)
-    indici=[]
-    indici=domain_table.ReadAssociation("ccccc")
-    indici = domain_table.IncrementalIndex(indici)
+    #indici=[]
+    #indici=domain_table.ReadAssociation("ccccc")
+    #indici = domain_table.IncrementalIndex(indici)
     
     #print "via"
     #for i in range (0,3):
