@@ -26,3 +26,7 @@ class UrlBox(db.Model):
     shorted_url = db.StringProperty(multiline=False)
     date = db.FloatProperty()
     active = db.BooleanProperty()
+
+class WhiteList(db.Model):
+    domain = db.StringProperty(multiline=False)
+    note = db.StringProperty(multiline=False)

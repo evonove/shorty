@@ -2,6 +2,7 @@ from google.appengine.ext import db
 from binding import bind
 from models import DomainTable
 from models import UrlBox
+import whitelist
 import time 
 
 def core_classic(url):
@@ -141,8 +142,10 @@ def computeDomain(url):
     else:
         dom = url[start+4:stop]
 
-#blocco sul controllo del dominio se in white list concesso 
-    if controllo == 1 :
+    #blocco sul controllo del dominio se in white list concesso 
+    #if controllo == 1 :
+    #    dom = dom[0:len(dom)-3]
+    if whitelist.checkInWhite(dom):
         dom = dom[0:len(dom)-3]
     
     return dom
@@ -165,12 +168,13 @@ def whiteList():
 
 def main():
     #core_classic("http://www.google.it/abc/lod")
-    #core_classic("http://www.google.it/abc/loa")
+    core_classic("http://www.facebook.it/abc/loa")
     #core_classic("http://www.libero.it/ac/lde")
-    core_custum("http://www.facebook.it/jjfnhgggd","facebook_libro")
+    core_custum("http://www.facebook.it/ssss","my_facebook")
+    core_custum("http://www.xxx.it/la_sss","thiisnot")
     #core_custum("http://www.facebook.it/jjfn","fieradellibro")
     #cancel("www.cerbero.it/facebook_facebook_libro")
-     
+    #whitelist.insertInWhite("facebook.it","sito di social network") 
   
 if __name__ == "__main__":
     main()
