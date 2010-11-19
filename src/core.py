@@ -5,27 +5,97 @@ from models import UrlBox
 import time 
 
 def core_classic(url):
+    '''
+    '''
+    if is_shorted(url):
+        du=UrlBox()
+        query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
+        du = query.fetch(1)[0]
+        shorted = du.shorted_url
+         
+    else:
+        mydomain="www.cerbero.it/"
+        dominio = computeDomain(url)
+        is_recycle=isReciclable(dominio)
+        if is_recycle:
+            shorted = recycle(dominio,url)
+        else:
+            shorted = bind(dominio) 
+            url_shortato = mydomain+dominio+shorted
+            dt=UrlBox()
+            dt.domain = dominio
+            dt.url = url 
+            dt.shorted_url=url_shortato
+            dt.date=time.mktime(time.localtime())
+            dt.active = True
+            db.put(dt) 
+    return shorted
+    
+def core_custum(url,user_url):
+    '''
+    '''
     mydomain="www.cerbero.it/"
     dominio = computeDomain(url)
-    is_recycle=isReciclable(dominio)
-    if is_recycle:
-        shorted = recycle(dominio,url)
+    url_shortato = mydomain+dominio+"_"+user_url    
+    if is_alredy_custum(url_shortato):
+        #query = db.Query(UrlBox).filter('shorted_url = ',url_shortato).filter('active = ',True)
+        print "attenzione :"
+        print "errore gia short" 
     else:
-        shorted = bind(dominio) 
-        url_shortato = mydomain+dominio+shorted
         dt=UrlBox()
-        dt.domain = dominio
-        dt.url = url 
-        dt.shorted_url=url_shortato
-        dt.date=time.mktime(time.localtime())
-        dt.active = True
-        db.put(dt) 
-    return shorted
+        if isReciclableCustum(url_shortato):
+            query = db.Query(UrlBox).filter('shorted_url = ', url_shortato ).filter('active = ' , False)
+            dt = query.fetch(1)[0]
+            dt.shorted_url = url_shortato 
+            dt.date=time.mktime(time.localtime())
+            dt.active = True
+            db.put(dt)     
+        else:
+            dt.domain = dominio
+            dt.url = url 
+            dt.shorted_url=url_shortato
+            dt.date=time.mktime(time.localtime())
+            dt.active = True
+            db.put(dt)
+
+def is_alredy_custum(shorted_url):
+    '''
+    '''
+    query = db.Query(UrlBox).filter('shorted_url = ', shorted_url ).filter('active = ' , True )
+    if query.count()>0:
+        return True
+    
+    else :
+        return False
     
 
 
+
+def is_shorted(url):
+    '''
+    '''
+    #du=UrlBox()
+    query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
+    if query.count()>0:
+        return True
+    else:
+        return False
+
+
+def isReciclableCustum(shorted_url):
+    query = db.Query(UrlBox).filter('shorted_url = ',shorted_url).filter('active = ', False)
+    if query.count()>0:
+        return True
+    else:
+        return False
+        
+
+
+
 def isReciclable(dominio):
-    dt=UrlBox()
+    '''
+    '''
+    #dt=UrlBox()
     query = db.Query(UrlBox).filter('domain = ',dominio ).filter('active = ', False)
     if query.count()>0:
         return True
@@ -34,6 +104,8 @@ def isReciclable(dominio):
     
 
 def recycle(dominio,url):
+    '''
+    '''
     dt=UrlBox()
     query = db.Query(UrlBox).filter('domain = ',dominio ).filter('active = ', False)
     dt = query.fetch(1)[0]
@@ -47,6 +119,8 @@ def recycle(dominio,url):
 
 
 def computeDomain(url):
+    '''
+    '''
     count = 0
     start = 0
     stop = 0
@@ -74,15 +148,28 @@ def computeDomain(url):
     return dom
 
 
+def cancel(url_short):
+    dt=UrlBox()
+    query = db.Query(UrlBox).filter('shorted_url = ',url_short ).filter('active = ', True)
+    if query.count()>0:
+        dt = query.fetch(1)[0]
+        dt.active=False
+        db.put(dt)
+    else:
+        print "attenzione"
+        print "errore url non presente"
+    
+
 def whiteList():
     return 1
 
 def main():
-    core_classic("http://www.google.it/abc/lod")
-    core_classic("http://www.google.it/abc/loa")
-    core_classic("http://www.libero.it/ac/lde")
-    
-
+    #core_classic("http://www.google.it/abc/lod")
+    #core_classic("http://www.google.it/abc/loa")
+    #core_classic("http://www.libero.it/ac/lde")
+    core_custum("http://www.facebook.it/jjfnhgggd","facebook_libro")
+    #core_custum("http://www.facebook.it/jjfn","fieradellibro")
+    #cancel("www.cerbero.it/facebook_facebook_libro")
      
   
 if __name__ == "__main__":
