@@ -2,62 +2,112 @@ from google.appengine.ext import db
 from binding import bind
 from models import DomainTable
 from models import UrlBox
+import response
 import whitelist
-import time 
+import time
+import sys 
 
 def core_classic(url):
     '''
     '''
-    if is_shorted(url):
-        du=UrlBox()
-        query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
-        du = query.fetch(1)[0]
-        shorted = du.shorted_url
+    try :
+        if is_shorted(url):
+            du=UrlBox()
+            query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
+            du = query.fetch(1)[0]
+            shorted = du.shorted_url
          
-    else:
-        mydomain="www.cerbero.it/"
-        dominio = computeDomain(url)
-        is_recycle=isReciclable(dominio)
-        if is_recycle:
-            shorted = recycle(dominio,url)
         else:
-            shorted = bind(dominio) 
-            url_shortato = mydomain+dominio+shorted
-            dt=UrlBox()
-            dt.domain = dominio
-            dt.url = url 
-            dt.shorted_url=url_shortato
-            dt.date=time.mktime(time.localtime())
-            dt.active = True
-            db.put(dt) 
-    return shorted
+            mydomain="www.cerbero.it/"
+            dominio = computeDomain(url)
+            is_recycle=isReciclable(dominio)
+            if is_recycle:
+                shorted = recycle(dominio,url)
+            else:
+                shorted = bind(dominio) 
+                url_shortato = mydomain+dominio+shorted
+                dt=UrlBox()
+                dt.domain = dominio
+                dt.url = url 
+                dt.shorted_url=url_shortato
+                dt.date=time.mktime(time.localtime())
+                dt.active = True
+                db.put(dt)
+    #         
+    #res = response.MakeJson(dt.shorted_url,)
+        return shorted
+    except:
+        error = str(sys.exc_info()[0])
+        print error 
+
     
 def core_custum(url,user_url):
     '''
     '''
-    mydomain="www.cerbero.it/"
-    dominio = computeDomain(url)
-    url_shortato = mydomain+dominio+"_"+user_url    
-    if is_alredy_custum(url_shortato):
+    try : 
+        mydomain="www.cerbero.it/"
+        dominio = computeDomain(url)
+        url_shortato = mydomain+dominio+"_"+user_url    
+        if is_alredy_custum(url_shortato):
         #query = db.Query(UrlBox).filter('shorted_url = ',url_shortato).filter('active = ',True)
-        print "attenzione :"
-        print "errore gia short" 
-    else:
-        dt=UrlBox()
-        if isReciclableCustum(url_shortato):
-            query = db.Query(UrlBox).filter('shorted_url = ', url_shortato ).filter('active = ' , False)
-            dt = query.fetch(1)[0]
-            dt.shorted_url = url_shortato 
-            dt.date=time.mktime(time.localtime())
-            dt.active = True
-            db.put(dt)     
+            print "attenzione :"
+            print "errore gia short" 
         else:
-            dt.domain = dominio
-            dt.url = url 
-            dt.shorted_url=url_shortato
-            dt.date=time.mktime(time.localtime())
-            dt.active = True
-            db.put(dt)
+            dt=UrlBox()
+            if isReciclableCustum(url_shortato):
+                query = db.Query(UrlBox).filter('shorted_url = ', url_shortato ).filter('active = ' , False)
+                dt = query.fetch(1)[0]
+                dt.shorted_url = url_shortato 
+                dt.date=time.mktime(time.localtime())
+                dt.active = True
+                db.put(dt)     
+            else:
+                dt.domain = dominio
+                dt.url = url 
+                dt.shorted_url=url_shortato
+                dt.date=time.mktime(time.localtime())
+                dt.active = True
+                db.put(dt)
+    except:
+        error = str(sys.exc_info()[0])
+        print error
+        
+        
+def domainList(domain,max_view):
+    '''
+    '''
+    try :
+        list_of_short =[]
+        query = db.Query(UrlBox).filter('domain = ', domain )
+        results = query.fetch(max_view)
+        for res in results:
+            list_of_short.append(res.shorted_url)
+        
+        return list_of_short
+    
+    except:
+        error = str(sys.exc_info()[0])
+        print error
+    
+def totalsDomain(domain):
+    '''
+    '''
+    try :
+        query = UrlBox.all().filter(' domain = ', domain)
+        return query.count()
+    except:
+        error = str(sys.exc_info()[0])
+        print error
+
+def totals():
+    '''
+    '''
+    try:
+        query = UrlBox.all()
+        return query.count()
+    except:
+        error = str(sys.exc_info()[0])
+        print error
 
 def is_alredy_custum(shorted_url):
     '''
@@ -84,6 +134,8 @@ def is_shorted(url):
 
 
 def isReciclableCustum(shorted_url):
+    '''
+    '''
     query = db.Query(UrlBox).filter('shorted_url = ',shorted_url).filter('active = ', False)
     if query.count()>0:
         return True
@@ -142,9 +194,7 @@ def computeDomain(url):
     else:
         dom = url[start+4:stop]
 
-    #blocco sul controllo del dominio se in white list concesso 
-    #if controllo == 1 :
-    #    dom = dom[0:len(dom)-3]
+   
     if whitelist.checkInWhite(dom):
         dom = dom[0:len(dom)-3]
     
@@ -152,29 +202,40 @@ def computeDomain(url):
 
 
 def cancel(url_short):
-    dt=UrlBox()
-    query = db.Query(UrlBox).filter('shorted_url = ',url_short ).filter('active = ', True)
-    if query.count()>0:
-        dt = query.fetch(1)[0]
-        dt.active=False
-        db.put(dt)
-    else:
-        print "attenzione"
-        print "errore url non presente"
-    
+    try:
+        dt=UrlBox()
+        query = db.Query(UrlBox).filter('shorted_url = ',url_short ).filter('active = ', True)
+        if query.count()>0:
+            dt = query.fetch(1)[0]
+            dt.active=False
+            db.put(dt)
+        else:
+            print "attenzione"
+            print "errore url non presente"
+    except:
+        error = str(sys.exc_info()[0])
+        print error
 
-def whiteList():
-    return 1
 
 def main():
+    
+    #whitelist.insertInWhite("facebook.it","sito di social network")
     #core_classic("http://www.google.it/abc/lod")
-    core_classic("http://www.facebook.it/abc/loa")
+    #core_classic("http://www.facebook.it/abc/loa")
     #core_classic("http://www.libero.it/ac/lde")
-    core_custum("http://www.facebook.it/ssss","my_facebook")
-    core_custum("http://www.xxx.it/la_sss","thiisnot")
+    #core_custum("http://www.facebook.it/ddd.html","my_facebook_page")
+    #core_custum("http://www.xxx.it/la_sss","thiisnot")
     #core_custum("http://www.facebook.it/jjfn","fieradellibro")
     #cancel("www.cerbero.it/facebook_facebook_libro")
-    #whitelist.insertInWhite("facebook.it","sito di social network") 
+    #tot = totalsDomain("facebook")
+    #tot2 = totals()
+    #print tot  
+    #print tot2
+    list = domainList("facebook",10)
+    for i in list:
+        print i
+    
+     
   
 if __name__ == "__main__":
     main()
