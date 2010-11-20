@@ -10,12 +10,18 @@ import sys
 def core_classic(url):
     '''
     '''
+    #aggiungere la retrun
     try :
         if is_shorted(url):
             du=UrlBox()
             query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
             du = query.fetch(1)[0]
-            shorted = du.shorted_url
+             #shorted = du.shorted_url
+            message_list=[]
+            message_list.append(du.shorted_url)
+            resp = response.MakeJson(message_list,du.date,False,"0",totals())
+            #resp.printJsonElement("message")
+            #resp.printJsonElement("total_short")
          
         else:
             mydomain="www.cerbero.it/"
@@ -23,6 +29,9 @@ def core_classic(url):
             is_recycle=isReciclable(dominio)
             if is_recycle:
                 shorted = recycle(dominio,url)
+                message_list=[]
+                message_list.append(shorted)
+                resp = response.MakeJson(message_list,"devo modificare data",False,"0",totals())
             else:
                 shorted = bind(dominio) 
                 url_shortato = mydomain+dominio+shorted
@@ -33,12 +42,18 @@ def core_classic(url):
                 dt.date=time.mktime(time.localtime())
                 dt.active = True
                 db.put(dt)
+                message_list=[]
+                message_list.append(dt.shorted_url)
+                resp = response.MakeJson(message_list,dt.date,False,"0",totals())
     #         
     #res = response.MakeJson(dt.shorted_url,)
-        return shorted
+        #return shorted
     except:
         error = str(sys.exc_info()[0])
-        print error 
+        date=time.mktime(time.localtime())
+        #print error
+        message_list=["si è verificato un errore"]
+        resp = response.MakeJson(message_list,date,True,"1",totals()) 
 
     
 def core_custum(url,user_url):
@@ -220,7 +235,7 @@ def cancel(url_short):
 def main():
     
     #whitelist.insertInWhite("facebook.it","sito di social network")
-    #core_classic("http://www.google.it/abc/lod")
+    core_classic("http://www.google.it/abc/lod")
     #core_classic("http://www.facebook.it/abc/loa")
     #core_classic("http://www.libero.it/ac/lde")
     #core_custum("http://www.facebook.it/ddd.html","my_facebook_page")
@@ -231,9 +246,9 @@ def main():
     #tot2 = totals()
     #print tot  
     #print tot2
-    list = domainList("facebook",10)
-    for i in list:
-        print i
+    #list = domainList("facebook",10)
+    #for i in list:
+    #   print i
     
      
   
