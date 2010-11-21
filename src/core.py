@@ -2,6 +2,7 @@ from google.appengine.ext import db
 from binding import bind
 from models import DomainTable
 from models import UrlBox
+from urlparse import urlparse
 import response
 import whitelist
 import time
@@ -189,27 +190,15 @@ def recycle(dominio,url):
 def computeDomain(url):
     '''
     '''
+    parsed = urlparse(url)
+    domain = parsed.hostname
     count = 0
-    start = 0
-    stop = 0
-    controllo = 1 
-
-    for c in url:
-        if c=='w' and start==0:
-                start = count
-        elif c=='/' and start>0 :
-                stop = count
+    for i in domain:
+        if i==".":
+                dom=domain[count+1:len(domain)+1]
                 break
-        else : 
-                stop=len(url)
-        count = count + 1
-        
-    if url[0]=='w': 
-        dom = url[start+3:stop]
-    else:
-        dom = url[start+4:stop]
+        count = count+1
 
-   
     if whitelist.checkInWhite(dom):
         dom = dom[0:len(dom)-3]
     
@@ -234,12 +223,12 @@ def cancel(url_short):
 
 def main():
     
-    #whitelist.insertInWhite("facebook.it","sito di social network")
+    whitelist.insertInWhite("facebook.it","sito di social network")
     core_classic("http://www.google.it/abc/lod")
-    #core_classic("http://www.facebook.it/abc/loa")
+    core_classic("http://www.facebook.it/abc/loa")
     #core_classic("http://www.libero.it/ac/lde")
     #core_custum("http://www.facebook.it/ddd.html","my_facebook_page")
-    #core_custum("http://www.xxx.it/la_sss","thiisnot")
+    core_custum("http://msn.xxx.it/la_sss","thiisnot")
     #core_custum("http://www.facebook.it/jjfn","fieradellibro")
     #cancel("www.cerbero.it/facebook_facebook_libro")
     #tot = totalsDomain("facebook")
