@@ -3,10 +3,14 @@ from models import WhiteList
 
 #senza www - chiedere 
 def insertInWhite(domain,note):
-    white = WhiteList()
-    white.domain=domain
-    white.note = note
-    db.put(white)
+    query = db.Query(WhiteList).filter('domain = ', domain )
+    if query.count()>0:
+        print "errore"
+    else:
+        white = WhiteList()
+        white.domain=domain
+        white.note = note
+        db.put(white)
     
 def cancelInWhite(domain):
     white = WhiteList()
