@@ -4,7 +4,7 @@ import time
 
 class MakeJson():
         def __init__(self,message,initial_date,error,error_code,total_short):
-                #message per me e' una lista 
+                #message e' una lista 
                 self.message=message
                 self.start_time = initial_date
                 self.error = error

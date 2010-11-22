@@ -11,18 +11,17 @@ import sys
 def core_classic(url):
     '''
     '''
-    #aggiungere la retrun
     try :
         if is_shorted(url):
             du=UrlBox()
             query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
             du = query.fetch(1)[0]
-             #shorted = du.shorted_url
+            #shorted = du.shorted_url
             message_list=[]
             message_list.append(du.shorted_url)
             resp = response.MakeJson(message_list,du.date,False,"0",totals())
-            #resp.printJsonElement("message")
-            #resp.printJsonElement("total_short")
+            json_object = resp.serializeJson()
+            return json_object
          
         else:
             mydomain="www.cerbero.it/"
@@ -31,8 +30,10 @@ def core_classic(url):
             if is_recycle:
                 shorted = recycle(dominio,url)
                 message_list=[]
-                message_list.append(shorted)
-                resp = response.MakeJson(message_list,"devo modificare data",False,"0",totals())
+                message_list.append(shorted[0])
+                resp = response.MakeJson(message_list,shorted[1],False,"0",totals())
+                json_object = resp.serializeJson()
+                return json_object
             else:
                 shorted = bind(dominio) 
                 url_shortato = mydomain+dominio+shorted
@@ -46,15 +47,15 @@ def core_classic(url):
                 message_list=[]
                 message_list.append(dt.shorted_url)
                 resp = response.MakeJson(message_list,dt.date,False,"0",totals())
-    #         
-    #res = response.MakeJson(dt.shorted_url,)
-        #return shorted
+                json_object = resp.serializeJson()
+                return json_object
     except:
         error = str(sys.exc_info()[0])
         date=time.mktime(time.localtime())
-        #print error
-        message_list=["si è verificato un errore"]
-        resp = response.MakeJson(message_list,date,True,"1",totals()) 
+        message_list=["si è verificato un errore : "+str(error)]
+        resp = response.MakeJson(message_list,date,True,"1",totals())
+        json_object = resp.serializeJson()
+        return json_object  
 
     
 def core_custum(url,user_url):
@@ -65,9 +66,12 @@ def core_custum(url,user_url):
         dominio = computeDomain(url)
         url_shortato = mydomain+dominio+"_"+user_url    
         if is_alredy_custum(url_shortato):
-        #query = db.Query(UrlBox).filter('shorted_url = ',url_shortato).filter('active = ',True)
-            print "attenzione :"
-            print "errore gia short" 
+            date=time.mktime(time.localtime())
+            message_list=["si è verificato un errore : "+ "url già assegnato"]
+            resp = response.MakeJson(message_list,date,True,"1",totals())
+            json_object = resp.serializeJson()
+            return json_object
+            
         else:
             dt=UrlBox()
             if isReciclableCustum(url_shortato):
@@ -77,6 +81,10 @@ def core_custum(url,user_url):
                 dt.date=time.mktime(time.localtime())
                 dt.active = True
                 db.put(dt)     
+                message_list=[dt.shorted_url]
+                resp = response.MakeJson(message_list,dt.date,False,"0",totals())
+                json_object = resp.serializeJson()
+                return json_object
             else:
                 dt.domain = dominio
                 dt.url = url 
@@ -84,11 +92,19 @@ def core_custum(url,user_url):
                 dt.date=time.mktime(time.localtime())
                 dt.active = True
                 db.put(dt)
+                message_list=[dt.shorted_url]
+                resp = response.MakeJson(message_list,dt.date,False,"0",totals())
+                json_object = resp.serializeJson()
+                return json_object
+                
     except:
         error = str(sys.exc_info()[0])
-        print error
-        
-        
+        date=time.mktime(time.localtime())
+        message_list=["si è verificato un errore : "+str(error)]
+        resp = response.MakeJson(message_list,date,True,"0",totals())
+        json_object = resp.serializeJson()
+        return json_object
+             
 def domainList(domain,max_view):
     '''
     '''
@@ -183,7 +199,9 @@ def recycle(dominio,url):
     dt.date = time.mktime(time.localtime())
     shorted = dt.shorted_url
     db.put(dt)
-    return shorted
+    info=[]
+    info[0]=shorted
+    info[1]= dt.date
 
 
 
