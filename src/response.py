@@ -1,10 +1,13 @@
+from StringIO import StringIO
 import simplejson as json
 import time
 
 
+
+
 class MakeJson():
         def __init__(self,message,initial_date,error,error_code,total_short):
-                #message e' una lista 
+                #message e' una lista ricordare di passarla come tale 
                 self.message=message
                 self.start_time = initial_date
                 self.error = error
@@ -14,25 +17,23 @@ class MakeJson():
         def serializeJson(self):
                 '''
                 '''
-                response =  json.dumps({"Header":({"start_date":self.start_time,\
-                "stop_date":self.stop_date,"total_short":self.total_short,"Error":self.error,\
-                "error_id":self.error_code}), "Body":{"message":self.message}})
+                response =  json.dumps({"Header":({"Start_date":self.start_time,\
+                "Stop_date":self.stop_date,"Total_short":self.total_short,"Error":self.error,\
+                "Error_id":self.error_code}), "Body":{"Message":self.message}})
                 return response
-        def printJsonElement(self,item):
-            '''
-            '''
-            if item == "message" :
-                for i in self.message:
-                    print i
-                #print self.message
-            elif item == "start_time":
-                    print self.start_time
-            elif item == "error":
-                    print self.error
-            elif item == "error_code":
-                    print self.error_code
-            elif item == "total_short":
-                    print self.total_short
-            else :
-                    print "elemento non trovato"
-     
+
+class DecodeJson():
+    def __init__(self,response):
+        self.json_object = json.load( StringIO(response))  
+    def getMessage(self):
+        return  self.json_object["Body"]["Message"]
+    def getStartDate(self):
+        return  self.json_object["Header"]["Start_date"]
+    def isError(self):
+        return  self.json_object["Header"]["Error"]
+    def getErrorCode(self):
+        return  self.json_object["Header"]["Error_id"] 
+    def totalShort(self):
+        return  self.json_object["Header"]["Total_short"]
+    def getStopDate(self):
+        return  self.json_object["Header"]["Stop_date"]
