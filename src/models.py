@@ -30,3 +30,18 @@ class UrlBox(db.Model):
 class WhiteList(db.Model):
     domain = db.StringProperty(multiline=False)
     note = db.StringProperty(multiline=False)
+#nuovi classi per gestire gli altri servizi di shortener  
+ 
+class BlackListShorty(db.Model):
+    domain = db.StringProperty(multiline=False)
+
+class Admin(db.Model):
+    user = db.StringProperty(multiline=False)
+    password = db.StringProperty(multiline=False)
+    
+     
+
+
+    
+    
+    

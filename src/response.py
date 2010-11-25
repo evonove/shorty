@@ -5,7 +5,7 @@ import time
 
 
 
-class MakeJson():
+class CodeJson():
         def __init__(self,message,initial_date,error,error_code,total_short):
                 #message e' una lista ricordare di passarla come tale 
                 self.message=message

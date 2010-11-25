@@ -3,6 +3,7 @@ from binding import bind
 from models import DomainTable
 from models import UrlBox
 from urlparse import urlparse
+import simplejson as json
 import response
 import whitelist
 import time
@@ -12,14 +13,14 @@ def core_classic(url):
     '''
     '''
     try :
-        if is_shorted(url):
+        if isShorted(url):
             du=UrlBox()
             query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
             du = query.fetch(1)[0]
             #shorted = du.shorted_url
             message_list=[]
             message_list.append(du.shorted_url)
-            resp = response.MakeJson(message_list,du.date,False,"0",totals())
+            resp = response.CodeJson(message_list,du.date,False,"0",totals())
             json_object = resp.serializeJson()
             return json_object
          
@@ -31,7 +32,7 @@ def core_classic(url):
                 shorted = recycle(dominio,url)
                 message_list=[]
                 message_list.append(shorted[0])
-                resp = response.MakeJson(message_list,shorted[1],False,"0",totals())
+                resp = response.CodeJson(message_list,shorted[1],False,"0",totals())
                 json_object = resp.serializeJson()
                 return json_object
             else:
@@ -45,15 +46,15 @@ def core_classic(url):
                 dt.active = True
                 db.put(dt)
                 message_list=[]
-                message_list.append(dt.shorted_url)
-                resp = response.MakeJson(message_list,dt.date,False,"0",totals())
+                message_list.append(dt.shorted_url)  
+                resp = response.CodeJson(message_list,dt.date,False,"0",totals())
                 json_object = resp.serializeJson()
                 return json_object
     except:
         error = str(sys.exc_info()[0])
         date=time.mktime(time.localtime())
-        message_list=["si è verificato un errore : "+str(error)]
-        resp = response.MakeJson(message_list,date,True,"1",totals())
+        message_list=["si e' verificato un errore : "+str(error)] 
+        resp = response.CodeJson(message_list,date,True,"1",totals())
         json_object = resp.serializeJson()
         return json_object  
 
@@ -65,10 +66,10 @@ def core_custum(url,user_url):
         mydomain="www.cerbero.it/"
         dominio = computeDomain(url)
         url_shortato = mydomain+dominio+"_"+user_url    
-        if is_alredy_custum(url_shortato):
+        if isAlredyCustum(url_shortato):
             date=time.mktime(time.localtime())
-            message_list=["si è verificato un errore : "+ "url già assegnato"]
-            resp = response.MakeJson(message_list,date,True,"1",totals())
+            message_list=["si e' verificato un errore : "+ "url gia' assegnato"]
+            resp = response.CodeJson(message_list,date,True,"1",totals())
             json_object = resp.serializeJson()
             return json_object
             
@@ -82,7 +83,7 @@ def core_custum(url,user_url):
                 dt.active = True
                 db.put(dt)     
                 message_list=[dt.shorted_url]
-                resp = response.MakeJson(message_list,dt.date,False,"0",totals())
+                resp = response.CodeJson(message_list,dt.date,False,"0",totals())
                 json_object = resp.serializeJson()
                 return json_object
             else:
@@ -93,15 +94,15 @@ def core_custum(url,user_url):
                 dt.active = True
                 db.put(dt)
                 message_list=[dt.shorted_url]
-                resp = response.MakeJson(message_list,dt.date,False,"0",totals())
+                resp = response.CodeJson(message_list,dt.date,False,"0",totals())
                 json_object = resp.serializeJson()
                 return json_object
                 
     except:
         error = str(sys.exc_info()[0])
         date=time.mktime(time.localtime())
-        message_list=["si è verificato un errore : "+str(error)]
-        resp = response.MakeJson(message_list,date,True,"0",totals())
+        message_list=["si e' verificato un errore : "+str(error)]
+        resp = response.CodeJson(message_list,date,True,"0",totals())
         json_object = resp.serializeJson()
         return json_object
              
@@ -141,7 +142,7 @@ def totals():
         error = str(sys.exc_info()[0])
         print error
 
-def is_alredy_custum(shorted_url):
+def isAlredyCustum(shorted_url):
     '''
     '''
     query = db.Query(UrlBox).filter('shorted_url = ', shorted_url ).filter('active = ' , True )
@@ -154,7 +155,7 @@ def is_alredy_custum(shorted_url):
 
 
 
-def is_shorted(url):
+def isShorted(url):
     '''
     '''
     #du=UrlBox()
@@ -202,7 +203,14 @@ def recycle(dominio,url):
     info=[]
     info[0]=shorted
     info[1]= dt.date
-
+    return info
+    
+def getRealUrl(shorted_url):
+    du=UrlBox()
+    query = db.Query(UrlBox).filter('shorted_url = ',shorted_url )
+    #gestione errore ?
+    du = query.fetch(1)[0]
+    return du.url
 
 
 def computeDomain(url):
@@ -239,14 +247,26 @@ def cancel(url_short):
         print error
 
 
+'''
 def main():
     
-    whitelist.insertInWhite("facebook.it","sito di social network")
-    core_classic("http://www.google.it/abc/lod")
-    core_classic("http://www.facebook.it/abc/loa")
+    #whitelist.insertInWhite("facebook.it","sito di social network")
+    #core_classic("www.libero.it/jjjjj/ddddd")
+    #res = core_classic("www.libero.it/jjjjj/ddddd")
+    print "sono_qui"
+    #print res
+    #print res.getMessage()
+    #core_classic("http://www.google.it/abc/lod")
+    #core_classic("http://www.facebook.it/abc/loa")
     #core_classic("http://www.libero.it/ac/lde")
-    #core_custum("http://www.facebook.it/ddd.html","my_facebook_page")
-    core_custum("http://msn.xxx.it/la_sss","thiisnot")
+    #core_custum("http://www.piccio.it/ddd.html","my_piccio_page")
+    #res = core_custum("http://msn.ripoooo.it/bbbb","piiiiaiaiai")
+    #decode = response.DecodeJson(res)
+    #print decode.getMessage()
+    #res = core_classic("http://www.google.it/piccio/asd")
+    #print res
+    #decode = response.DecodeJson(res)
+    
     #core_custum("http://www.facebook.it/jjfn","fieradellibro")
     #cancel("www.cerbero.it/facebook_facebook_libro")
     #tot = totalsDomain("facebook")
@@ -262,4 +282,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-        
+'''        
