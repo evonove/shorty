@@ -13,37 +13,28 @@ from google.appengine.ext.webapp import template
 class short(webapp.RequestHandler):
     def post(self):
         parametri= self.request.str_params
-        #print parametri['custom_string']
-        #print parametri['url']
         
         if parametri['url']=="":
-            #return self.response.error(500)
+            #errore ci deve essere l'url
             print "error"
         elif parametri['custom_string']=="":
-            #json_obj = core.core_classic(parametri['url'])
-            #return json_obj
-            print "sono qui in classic"
-            #print type(parametri['url'])
-            #print parametri['url'].type
             res = core.core_classic(parametri['url'])
-            print res
+            return res
         else:
-            print "sono qui"
-            print parametri['url']
-            print parametri['custom_string']
             json_obj = core.core_custum(parametri['url'],parametri['custom_string'])
-            print json_obj
-            #return json_obj
-            #res = response.DecodeJson(core.core_custum(str(parametri['url']),str(parametri['custom_string'])))
-            print res.getMessage()
+            return json_obj
         
     def get (self):
-        #ok il get funge
-        url = self.request.get('url')
-        print url
-        
-        
-    
+        try:
+            url = self.request.url
+            dominio = "www.cerbero.it"
+            sub = url[21:len(url)]
+            red = dominio + sub
+            normal_url=core.getRealUrl(red)
+            self.redirect(normal_url)              
+        except:
+            self.error(500)
+
 application = webapp.WSGIApplication([('/.+', short)])
 
 def main():

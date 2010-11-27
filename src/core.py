@@ -3,6 +3,7 @@ from binding import bind
 from models import DomainTable
 from models import UrlBox
 from urlparse import urlparse
+from models import WhiteList
 import simplejson as json
 import response
 import whitelist
@@ -62,6 +63,11 @@ def core_classic(url):
 def core_custum(url,user_url):
     '''
     '''
+    print "inside core custum"
+    print url
+    print user_url
+    print type(url)
+    print type(user_url)
     try : 
         mydomain="www.cerbero.it/"
         dominio = computeDomain(url)
@@ -260,11 +266,11 @@ def main():
     #core_classic("http://www.facebook.it/abc/loa")
     #core_classic("http://www.libero.it/ac/lde")
     #core_custum("http://www.piccio.it/ddd.html","my_piccio_page")
-    #res = core_custum("http://msn.ripoooo.it/bbbb","piiiiaiaiai")
+    res = core_custum("www.repubblica.it/pippo","giornale_mio")
     #decode = response.DecodeJson(res)
     #print decode.getMessage()
     #res = core_classic("http://www.google.it/piccio/asd")
-    #print res
+    print res
     #decode = response.DecodeJson(res)
     
     #core_custum("http://www.facebook.it/jjfn","fieradellibro")
@@ -281,5 +287,5 @@ def main():
   
 if __name__ == "__main__":
     main()
-
-'''        
+'''
+       
