@@ -1,16 +1,14 @@
 from google.appengine.ext import db
 from models import DomainTable
-
+import string
 
 def bind(domain):
     ''' 
     
     '''
-    grammar=["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q",\
-            "R","S","T","U","V","W","X","Y","Z","a","b","c","d","e","f","g","h","i","j","k",\
-            "l","m","n","o","p","q","r","s","t","u","w","x","y","z","0","1","2","3","4","5",\
-            "6","7","8","9"]
-
+    letters = [x for x in string.ascii_letters]
+    numbers = [str(x) for x in xrange(10)]
+    grammar = letters + numbers
     separator = ["_","-","+"]
     
     dt=DomainTable()
