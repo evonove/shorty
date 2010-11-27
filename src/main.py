@@ -1,16 +1,11 @@
-import cgi
 import os
-import core
-import response
+import core.functions as core
+import core.formats as formats
+from api.handlers import ShortHandler, ExpandHandler
 
-from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.ext import db
 from google.appengine.ext.webapp import template
-#vediamo un po
-from google.appengine.api import urlfetch
-
 
 
 class MainPage(webapp.RequestHandler):
@@ -33,16 +28,16 @@ class Result(webapp.RequestHandler):
         url = self.request.get('url')
         pers = self.request.get('custom_hash')
         if methods=="classic":
-            res = response.DecodeJson(core.core_classic(url))
-            print res.getMessage()
+            res = formats.DecodeJson(core.core_classic(url))
+            self.response.out.write(res.getMessage())
         elif methods=="custom":
-            res = response.DecodeJson(core.core_custum(url,pers))
+            res = formats.DecodeJson(core.core_custum(url,pers))
             print res.getMessage()
         else :
             print "non trovato"
 
 class Resolve(webapp.RequestHandler):
-    
+    """Given a shorted url, expand it and redirect user"""
     def get(self):
         try:
             url = self.request.url
@@ -53,15 +48,15 @@ class Resolve(webapp.RequestHandler):
             self.redirect(normal_url)              
         except:
             self.error(500)
-   
-            
-            
-application = webapp.WSGIApplication([('/', MainPage),('/result', Result),('/.+' , Resolve)],debug=True)
 
 
+application = webapp.WSGIApplication([
+      ('/', MainPage),
+      ('/result', Result),
+      ('/api/short', ShortHandler),
+      ('/api/expand', ExpandHandler),
+      ('/.+' , Resolve)],debug=True)
 
-def main():
-    run_wsgi_app(application)
 
 if __name__ == "__main__":
-    main()
+    run_wsgi_app(application)

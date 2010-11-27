@@ -1,11 +1,8 @@
 from google.appengine.ext import db
 from binding import bind
-from models import DomainTable
 from models import UrlBox
 from urlparse import urlparse
-from models import WhiteList
-import simplejson as json
-import response
+import formats
 import whitelist
 import time
 import sys 
@@ -21,7 +18,7 @@ def core_classic(url):
             #shorted = du.shorted_url
             message_list=[]
             message_list.append(du.shorted_url)
-            resp = response.CodeJson(message_list,du.date,False,"0",totals())
+            resp = formats.CodeJson(message_list,du.date,False,"0",totals())
             json_object = resp.serializeJson()
             return json_object
          
@@ -33,7 +30,7 @@ def core_classic(url):
                 shorted = recycle(dominio,url)
                 message_list=[]
                 message_list.append(shorted[0])
-                resp = response.CodeJson(message_list,shorted[1],False,"0",totals())
+                resp = formats.CodeJson(message_list,shorted[1],False,"0",totals())
                 json_object = resp.serializeJson()
                 return json_object
             else:
@@ -48,14 +45,14 @@ def core_classic(url):
                 db.put(dt)
                 message_list=[]
                 message_list.append(dt.shorted_url)  
-                resp = response.CodeJson(message_list,dt.date,False,"0",totals())
+                resp = formats.CodeJson(message_list,dt.date,False,"0",totals())
                 json_object = resp.serializeJson()
                 return json_object
     except:
         error = str(sys.exc_info()[0])
         date=time.mktime(time.localtime())
         message_list=["si e' verificato un errore : "+str(error)] 
-        resp = response.CodeJson(message_list,date,True,"1",totals())
+        resp = formats.CodeJson(message_list,date,True,"1",totals())
         json_object = resp.serializeJson()
         return json_object  
 
@@ -75,7 +72,7 @@ def core_custum(url,user_url):
         if isAlredyCustum(url_shortato):
             date=time.mktime(time.localtime())
             message_list=["si e' verificato un errore : "+ "url gia' assegnato"]
-            resp = response.CodeJson(message_list,date,True,"1",totals())
+            resp = formats.CodeJson(message_list,date,True,"1",totals())
             json_object = resp.serializeJson()
             return json_object
             
@@ -89,7 +86,7 @@ def core_custum(url,user_url):
                 dt.active = True
                 db.put(dt)     
                 message_list=[dt.shorted_url]
-                resp = response.CodeJson(message_list,dt.date,False,"0",totals())
+                resp = formats.CodeJson(message_list,dt.date,False,"0",totals())
                 json_object = resp.serializeJson()
                 return json_object
             else:
@@ -100,7 +97,7 @@ def core_custum(url,user_url):
                 dt.active = True
                 db.put(dt)
                 message_list=[dt.shorted_url]
-                resp = response.CodeJson(message_list,dt.date,False,"0",totals())
+                resp = formats.CodeJson(message_list,dt.date,False,"0",totals())
                 json_object = resp.serializeJson()
                 return json_object
                 
@@ -108,7 +105,7 @@ def core_custum(url,user_url):
         error = str(sys.exc_info()[0])
         date=time.mktime(time.localtime())
         message_list=["si e' verificato un errore : "+str(error)]
-        resp = response.CodeJson(message_list,date,True,"0",totals())
+        resp = formats.CodeJson(message_list,date,True,"0",totals())
         json_object = resp.serializeJson()
         return json_object
              
@@ -288,4 +285,3 @@ def main():
 if __name__ == "__main__":
     main()
 '''
-       

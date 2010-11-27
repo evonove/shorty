@@ -1,16 +1,9 @@
-import cgi
-import os
-import core
-import response
-import models 
+import core.functions as core
 
-from google.appengine.api import users
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.ext import db
-from google.appengine.ext.webapp import template
 
-class short(webapp.RequestHandler):
+class ShortHandler(webapp.RequestHandler):
+    """Given a long url, return a shorted one"""
     def post(self):
         parametri= self.request.str_params
         
@@ -23,9 +16,14 @@ class short(webapp.RequestHandler):
         else:
             json_obj = core.core_custum(parametri['url'],parametri['custom_string'])
             return json_obj
-        
+
+class ExpandHandler(webapp.RequestHandler):
+    """Given a shorted url by shorty, expand and return the original one"""
     def get (self):
         try:
+            print 'shorting'
+            self.response.out.write('Hello, webapp World!')
+            return
             url = self.request.url
             dominio = "www.cerbero.it"
             sub = url[21:len(url)]
@@ -34,11 +32,3 @@ class short(webapp.RequestHandler):
             self.redirect(normal_url)              
         except:
             self.error(500)
-
-application = webapp.WSGIApplication([('/.+', short)])
-
-def main():
-    run_wsgi_app(application)
-
-if __name__ == "__main__":
-    main()    
