@@ -15,7 +15,7 @@ def bind(domain):
     query = db.Query(DomainTable).filter('domain = ',domain)
     if query.count()==0:
         dt.domain = domain
-        dt.last_assignament = "_AA"
+        dt.last_assignament = "_aa"
         db.put(dt)
         return dt.last_assignament 
     else:
@@ -30,7 +30,6 @@ def computeShortTag (grammar,separator,last):
     '''
 
     '''
-
     index_sep = separator.index(last[0])
     index_frist = grammar.index(last[1])
     index_sec=grammar.index(last[2])
