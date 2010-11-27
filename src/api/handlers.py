@@ -18,7 +18,7 @@ class ShortHandler(webapp.RequestHandler):
             return json_obj
 
 class ExpandHandler(webapp.RequestHandler):
-    """Given a shorted url by shorty, expand and return the original one"""
+    """Given an url shorted by shorty, expand and return the original one"""
     def get (self):
         try:
             print 'shorting'
