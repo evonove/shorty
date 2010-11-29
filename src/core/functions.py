@@ -219,17 +219,15 @@ def getRealUrl(shorted_url):
 def computeDomain(url):
     '''
     '''
+    if url[0:7]!="http://":
+        url ="http://"+url
     parsed = urlparse(url)
     domain = parsed.hostname
-    count = 0
-    for i in domain:
-        if i==".":
-                dom=domain[count+1:len(domain)+1]
-                break
-        count = count+1
-
-    if whitelist.checkInWhite(dom):
-        dom = dom[0:len(dom)-3]
+    if domain[0:4]=="www.":
+            domain = domain[4:len(domain)]
+    
+    if whitelist.checkInWhite(domain):
+        dom = domain[0:len(domain)-3]
     
     return dom
 
