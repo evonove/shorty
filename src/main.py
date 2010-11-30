@@ -16,25 +16,33 @@ class MainPage(webapp.RequestHandler):
             'greetings': greetings,
            }
 
-        path = os.path.join(os.path.dirname(__file__), 'index.html')
+        path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
         self.response.out.write(template.render(path, template_values))
 
 class Result(webapp.RequestHandler):
     def post(self):
-        #print "invio dati"
-        #print self.request.get('url')
-        #print self.request.get('core')
         methods = self.request.get('core')
         url = self.request.get('url')
         pers = self.request.get('custom_hash')
+      
+        
         if methods=="classic":
             res = formats.DecodeJson(core.core_classic(url))
-            self.response.out.write(res.getMessage())
+            list_url = res.getMessage()
         elif methods=="custom":
             res = formats.DecodeJson(core.core_custum(url,pers))
-            print res.getMessage()
+            list_url = res.getMessage()
         else :
-            print "non trovato"
+            res = "non trovato"
+            list_url = res
+        
+        template_values = {
+            'urls': list_url,
+           }
+
+        path = os.path.join(os.path.dirname(__file__), 'templates/result.html')
+        self.response.out.write(template.render(path, template_values))
+        
 
 class Resolve(webapp.RequestHandler):
     """Given a shorted url, expand it and redirect user"""

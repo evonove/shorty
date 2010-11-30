@@ -60,11 +60,6 @@ def core_classic(url):
 def core_custum(url,user_url):
     '''
     '''
-    print "inside core custum"
-    print url
-    print user_url
-    print type(url)
-    print type(user_url)
     try : 
         mydomain="www.cerbero.it/"
         dominio = computeDomain(url)
@@ -211,10 +206,18 @@ def recycle(dominio,url):
 def getRealUrl(shorted_url):
     du=UrlBox()
     query = db.Query(UrlBox).filter('shorted_url = ',shorted_url )
-    #gestione errore ?
     du = query.fetch(1)[0]
+    du.last_click=time.mktime(time.localtime())
+    db.put(du) 
     return du.url
 
+def cancelPolicy(soglia):
+    data_from_cancel = time.mktime(time.localtime()) - soglia
+    query = db.Query(UrlBox).filter('last_click < ', data_from_cancel)
+    results = query.all
+    for res in results:
+        db.delete(res)
+    
 
 def computeDomain(url):
     '''
@@ -227,9 +230,9 @@ def computeDomain(url):
             domain = domain[4:len(domain)]
     
     if whitelist.checkInWhite(domain):
-        dom = domain[0:len(domain)-3]
+        domain = domain[0:len(domain)-3]
     
-    return dom
+    return domain
 
 
 def cancel(url_short):
@@ -254,7 +257,7 @@ def main():
     #whitelist.insertInWhite("facebook.it","sito di social network")
     #core_classic("www.libero.it/jjjjj/ddddd")
     #res = core_classic("www.libero.it/jjjjj/ddddd")
-    print "sono_qui"
+    #print "sono_qui"
     #print res
     #print res.getMessage()
     #core_classic("http://www.google.it/abc/lod")
@@ -265,7 +268,7 @@ def main():
     #decode = response.DecodeJson(res)
     #print decode.getMessage()
     #res = core_classic("http://www.google.it/piccio/asd")
-    print res
+    #print res
     #decode = response.DecodeJson(res)
     
     #core_custum("http://www.facebook.it/jjfn","fieradellibro")
