@@ -34,7 +34,7 @@ def core_classic(url):
                 json_object = resp.serializeJson()
                 return json_object
             else:
-                shorted = bind(dominio) 
+                shorted = bind(dominio,mydomain) 
                 url_shortato = mydomain+dominio+shorted
                 dt=UrlBox()
                 dt.domain = dominio

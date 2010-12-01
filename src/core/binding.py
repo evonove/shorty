@@ -1,8 +1,9 @@
 from google.appengine.ext import db
 from models import DomainTable
+import functions
 import string
 
-def bind(domain):
+def bind(domain,mydomain):
     ''' 
     
     '''
@@ -16,14 +17,22 @@ def bind(domain):
     if query.count()==0:
         dt.domain = domain
         dt.last_assignament = "_aa"
+        short = "_aa"
         db.put(dt)
-        return dt.last_assignament 
+        if functions.isAlredyCustum(mydomain+domain+short):
+            bind(domain,mydomain)
+        else: 
+            return dt.last_assignament
     else:
         dt = query.fetch(1)[0]
         short = computeShortTag(grammar,separator,dt.last_assignament)
         dt.last_assignament=short
         db.put(dt)
-        return dt.last_assignament
+        #controllo se ce lho gia 
+        if functions.isAlredyCustum(mydomain+domain+short):
+            bind(domain,mydomain)
+        else: 
+            return dt.last_assignament
     
                 
 def computeShortTag (grammar,separator,last):

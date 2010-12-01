@@ -63,7 +63,7 @@ ul:lista{
 	width: 800px;
 	height: 250px;
 	margin: 0px auto;
-	background: url(images/drago1.jpg) no-repeat left top;
+	background: url(src/templates/images/s_like_s.png) no-repeat left top;
 }
 
 #header h1, #header h2 {
