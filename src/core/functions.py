@@ -23,7 +23,7 @@ def core_classic(url):
             return json_object
          
         else:
-            mydomain="www.cerbero.it/"
+            mydomain="www.cerbero.it"
             dominio = computeDomain(url)
             is_recycle=isReciclable(dominio)
             if is_recycle:
