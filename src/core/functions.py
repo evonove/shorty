@@ -5,7 +5,30 @@ from urlparse import urlparse
 import formats
 import whitelist
 import time
-import sys 
+import sys
+
+def short(url, custom_string=None):
+    """Perform the shortening of a given url. Optionally use a custom string
+    instead of using internal algorithm provided by core module
+    
+    Params
+        url - the url to shorten: url
+        custom_string - the string to use to short the link: string
+    
+    Return
+        shorted url: url
+    
+    """
+    if already_shorted(url):
+        return url
+    
+    if custom_string:
+        pass
+        # TODO
+    else:
+        pass
+        # TODO
+    
 
 def core_classic(url):
     '''
