@@ -103,65 +103,66 @@ def core_custum(url,user_url):
         resp = formats.CodeJson(message_list,date,True,"0",totals())
         json_object = resp.serializeJson()
         return json_object
-             
-def domainList(domain,max_view):
+
+
+def get_shorts(domain, limit, offset=0):
+    '''Retrieve shorted urls for a certain domain.
+    
+    Params
+        domain - the domain for which retrieve results: string
+        limit - how many results at max to retrieve: int
+        offset - how many results to skip: int
+    
+    Return
+        a list containing shorted urls for the domain: list
     '''
+    query = db.Query(UrlBox).filter('domain = ', domain)
+    results = query.fetch(limit, offset)
+    return [x.shorted_url for x in results]
+
+
+def num_of_shorts(domain=None):
+    '''Count how many shorts we've got in the datastore
+    
+    Params
+        domain - if not None count shorts for that domain, count all otherwise
+    
+    Return
+        number of shorts: integer
     '''
-    try :
-        list_of_short =[]
-        query = db.Query(UrlBox).filter('domain = ', domain )
-        results = query.fetch(max_view)
-        for res in results:
-            list_of_short.append(res.shorted_url)
+    query = UrlBox.all()
+    if domain:
+        query.filter(' domain = ', domain)
+    return query.count()
+
+
+def is_short(shorted_url):
+    '''Check if a shorted url is known to the system, and in case if it is
+    currently active
+    
+    Params
+        shorted_url - an already shorted url to check: string
         
-        return list_of_short
+    Return
+        whether shorted url is known and active: boolean
+    '''
+    query = db.Query(UrlBox, keys_only=True)
+    query.filter('shorted_url = ', shorted_url).filter('active = ' , True)
+    return query.count() > 0
+
+
+def already_shorted(url):
+    '''Check if an url was already shorted
     
-    except:
-        error = str(sys.exc_info()[0])
-        print error
+    Params
+        url - url to check: string
     
-def totalsDomain(domain):
+    Return
+        whether the url was already shorted: boolean
     '''
-    '''
-    try :
-        query = UrlBox.all().filter(' domain = ', domain)
-        return query.count()
-    except:
-        error = str(sys.exc_info()[0])
-        print error
-
-def totals():
-    '''
-    '''
-    try:
-        query = UrlBox.all()
-        return query.count()
-    except:
-        error = str(sys.exc_info()[0])
-        print error
-
-def isAlredyCustum(shorted_url):
-    '''
-    '''
-    query = db.Query(UrlBox).filter('shorted_url = ', shorted_url ).filter('active = ' , True )
-    if query.count()>0:
-        return True
-    
-    else :
-        return False
-    
-
-
-
-def isShorted(url):
-    '''
-    '''
-    #du=UrlBox()
-    query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
-    if query.count()>0:
-        return True
-    else:
-        return False
+    query = db.Query(UrlBox, keys_only=True)
+    query.filter('url = ', url).filter('active = ', True)
+    return query.count() > 0
 
 
 def isReciclableCustum(shorted_url):
@@ -173,8 +174,6 @@ def isReciclableCustum(shorted_url):
     else:
         return False
         
-
-
 
 def isReciclable(dominio):
     '''
@@ -250,39 +249,3 @@ def cancel(url_short):
         error = str(sys.exc_info()[0])
         print error
 
-
-'''
-def main():
-    
-    #whitelist.insertInWhite("facebook.it","sito di social network")
-    #core_classic("www.libero.it/jjjjj/ddddd")
-    #res = core_classic("www.libero.it/jjjjj/ddddd")
-    #print "sono_qui"
-    #print res
-    #print res.getMessage()
-    #core_classic("http://www.google.it/abc/lod")
-    #core_classic("http://www.facebook.it/abc/loa")
-    #core_classic("http://www.libero.it/ac/lde")
-    #core_custum("http://www.piccio.it/ddd.html","my_piccio_page")
-    res = core_custum("www.repubblica.it/pippo","giornale_mio")
-    #decode = response.DecodeJson(res)
-    #print decode.getMessage()
-    #res = core_classic("http://www.google.it/piccio/asd")
-    #print res
-    #decode = response.DecodeJson(res)
-    
-    #core_custum("http://www.facebook.it/jjfn","fieradellibro")
-    #cancel("www.cerbero.it/facebook_facebook_libro")
-    #tot = totalsDomain("facebook")
-    #tot2 = totals()
-    #print tot  
-    #print tot2
-    #list = domainList("facebook",10)
-    #for i in list:
-    #   print i
-    
-     
-  
-if __name__ == "__main__":
-    main()
-'''
