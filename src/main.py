@@ -45,23 +45,23 @@ class Result(webapp.RequestHandler):
                 try :
                     if url[0:7]!="http://":
                         url ="http://"+url
-                    result = urlfetch.fetch(url=url,method=urlfetch.GET)
-                    if result.status_code == 200:
-                        if methods=="classic":
-                            res = formats.DecodeJson(core.core_classic(url))
-                            list_url = res.getMessage()
-                        elif methods=="custom":
-                            res = formats.DecodeJson(core.core_custum(url,pers))
-                            list_url = res.getMessage()
-                        else :
-                            res = "non trovato"
-                            list_url = res
-                    elif result.status_code==300 or result.status_code==301 or result.status_code==302 or result.status_code==303 or result.status_code==307:
-                        res = "redirect"
+                    #result = urlfetch.fetch(url=url,method=urlfetch.GET,follow_redirects=False)
+                    #if result.status_code == 200:
+                    if methods=="classic":
+                        res = formats.DecodeJson(core.short(url))
+                        list_url = res.getMessage()
+                    elif methods=="custom":
+                        res = formats.DecodeJson(core.short(url,pers))
+                        list_url = res.getMessage()
+                    else :
+                        res = "non trovato"
                         list_url = res
+                    #elif result.status_code in (300,301,302,303,307):
+                    #    res = "redirect"
+                    #    list_url = res
                 except :
-                    res = "Indirizzo non valido"
-                    list_url = res
+                        res = "Indirizzo non valido"
+                        list_url = res
         else:
             list_url = cResponse.error_code
 

@@ -1,25 +1,48 @@
 from google.appengine.ext import db
 
-#cambiare filosofia quando inserisco un associazione 
-#tengo l'ultimo assegnamento come stringa  e il dominio
-#per il prossimo assegamento parso la stringa e incremento
-#i contatori 
 
-class DomainTable (db.Model):
-    domain = db.StringProperty(multiline=False)
-    last_assignament = db.StringProperty(multiline=False)
-
-
-class UrlBox(db.Model):
-    """il flag active dice che l'associazione e' attiva . Quando faccio un
-    nuovo bindings per quel dominio vado a vedere se c'e' n'e' uno disattivo 
-    e gli asssegno quello
+class Domain(db.Model):
+    """ 
+        this class contain the Domain 
     
     Fields
-        TODO: docstrings 
+    
+        name_domain - name of the domain : string 
+        shorted_name - some domain have a different domain for deploy : string
+        last_assignament - last assignament for the core classic : string    
+    
+
+    """    
+    
+    name_domain = db.StringProperty(multiline=False)
+    shorted_name = db.StringProperty(multiline=False,default="all")
+    last_assignament = db.StringProperty(multiline=False)
+
+    """
+    old class
+class DomainTable (db.Model):
+    #domain = db.StringProperty(multiline=False)
+    domain = db.ReferenceProperty(Domain)
+    last_assignament = db.StringProperty(multiline=False)
+    """
+
+class UrlBox(db.Model):
+    """ 
+        this class contain the association between url and its url short
+        plus other utils information
+    
+    Fields
+    
+        domain - is a domain of the url : Domain 
+        url - is the url to short : string
+        shorted_url - is the shorted url : string 
+        date - date of make shorted url : date
+        active - if the shorted url is active : boolean 
+        last_click - last time who used this short url : date   
     
     """
-    domain = db.StringProperty(multiline=False)
+    #domain = db.StringProperty(multiline=False)
+    domain = db.ReferenceProperty(Domain)
     url = db.LinkProperty()
     shorted_url = db.LinkProperty()
     date = db.DateTimeProperty(auto_now=True)
@@ -28,16 +51,54 @@ class UrlBox(db.Model):
 
 
 class WhiteList(db.Model):
-    domain = db.StringProperty(multiline=False)
+    """ 
+        this class contain all the safetly domains, this domain 
+        not have the suffix
+    
+    Fields
+    
+        domain - a domain : Domain 
+        note - particular notes : string   
+    
+    """
+    #domain = db.StringProperty(multiline=False)
+    domain = db.ReferenceProperty(Domain)
     note = db.StringProperty(multiline=False)
-#nuovi classi per gestire gli altri servizi di shortener  
+  
 
  
 class BlackListShorty(db.Model):
-    domain = db.StringProperty(multiline=False)
+    """ 
+        this class contain all the domain who considerate dangerous
+    
+    Fields
+    
+        domain - a domain : Domain 
+        note - particular notes : string   
+    
+    """
+    #domain = db.StringProperty(multiline=False)
+    domain = db.ReferenceProperty(Domain)
+    note = db.StringProperty(multiline=False)
+  
 
-
-class Admin(db.Model):
-    user = db.StringProperty(multiline=False)
+class User(db.Model):
+    """ 
+        this class contain access's credentials 
+    
+    Fields
+    
+        user_name - user's name : string 
+        password -  user's password  : string   
+    
+    """
+  
+    user_name = db.StringProperty(multiline=False)
     password = db.StringProperty(multiline=False)
+    
+class Settings(db.Model):
+    check_valid = db.BooleanProperty(default=False)
+    
+
+       
 
