@@ -11,14 +11,14 @@ class ShortHandler(webapp.RequestHandler):
             #errore ci deve essere l'url
             print "error"
         elif parametri['custom_string']=="":
-            res = core.core_classic(parametri['url'])
+            res = core.short(parametri['url'])
             return res
         else:
-            json_obj = core.core_custum(parametri['url'],parametri['custom_string'])
+            json_obj = core.short(parametri['url'],parametri['custom_string'])
             return json_obj
 
 class ExpandHandler(webapp.RequestHandler):
-    """Given an url shorted by shorty, expand and return the original one"""
+    """ Given an url shorted by shorty, expand and return the original one """
     def get (self):
         try:
             print 'shorting'

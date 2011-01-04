@@ -3,27 +3,48 @@ from django.utils import simplejson as json
 import time
 
 
-class CodeJson():
+class Response():
     """
+    This class provide the instrument to codify teh Response
+    
+    Fields
+    
+        message - the replay : list of string 
+        date - the date of the request : string
+        error - message of error : string
+        error_code - the code of error : string
+        total_short - number of shorted url : integer
+        type - type of replay, the default is json : string    
+    
     
     """
     def __init__(self,message,initial_date,error,error_code,total_short):
         #message e' una lista ricordare di passarla come tale 
         self.message=message
-        self.start_time = initial_date
+        self.date = str(initial_date)
         self.error = error
         self.error_code = error_code
-        self.total_short=total_short
-        self.stop_date = time.mktime(time.localtime())
+        self.total_short=total_short 
+        
+            
 
     def serializeJson(self):
         '''
-
+        create a json object
+    
+        Params
+    
+        Return
+            response : json 
         '''
-        response =  json.dumps({"Header":({"Start_date":self.start_time,\
-        "Stop_date":self.stop_date,"Total_short":self.total_short,"Error":self.error,\
+        response =  json.dumps({"Header":({"Date":self.date,\
+        "Total_short":self.total_short,"Error":self.error,\
         "Error_id":self.error_code}), "Body":{"Message":self.message}})
         return response
+
+    def makeXml(self):
+        pass
+
 
 
 class DecodeJson():
@@ -36,8 +57,8 @@ class DecodeJson():
     def getMessage(self):
         return  self.json_object["Body"]["Message"]
     
-    def getStartDate(self):
-        return  self.json_object["Header"]["Start_date"]
+    def getDate(self):
+        return  self.json_object["Header"]["Date"]
     
     def isError(self):
         return  self.json_object["Header"]["Error"]
@@ -48,5 +69,3 @@ class DecodeJson():
     def totalShort(self):
         return  self.json_object["Header"]["Total_short"]
     
-    def getStopDate(self):
-        return  self.json_object["Header"]["Stop_date"]

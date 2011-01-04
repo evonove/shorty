@@ -6,11 +6,11 @@ import time
 import sys
 from models import Domain, UrlBox, WhiteList
 from whitelist import checkInWhite
-
+import datetime
 
  
 
-def short(url, custom_string=None):
+def short(url,custom_string=None):
     """
     Perform the shortening of a given url. Optionally use a custom string
     instead of using internal algorithm provided by core module
@@ -23,111 +23,122 @@ def short(url, custom_string=None):
         shorted url: url
     
     """
-    if already_shorted(url):
-        #return url
-        du=UrlBox()
-        query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
-        du = query.fetch(1)[0]
-        message_list=[]
-        message_list.append(du.shorted_url)
-        resp = formats.CodeJson(message_list,du.date,False,"0",num_of_shorts())
-        json_object = resp.serializeJson()
-        return json_object
+    domain_name = computeDomain(url)
+    domain = forcedGetDomain(domain_name)
+    mydomain = domain.shorted_name
+    
+    
+    """ 
+        this block is valid for the core classic only 
+        if already_shorted(url):
+            print "alredy"
+            urlBox = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True).get()
+            message_list=[]
+            message_list.append(urlBox.shorted_url)
+            json = formats.Response(message_list,urlBox.date,False,"0",num_of_shorts())
+            resp = json.serializeJson()
+            return resp
+    """
+  
     
     if custom_string:
-        #pass
-        # TODO core_custom
-        try : 
-            mydomain="www.cerbero.it/"
-            domain_name = computeDomain(url)
-            url_shortato = mydomain+domain_name+"/"+custom_string    
+        try :         
+            url_shortato = mydomain+"/"+domain_name+"/"+custom_string 
+            print url_shortato
             if is_short(url_shortato):
-                date=time.mktime(time.localtime())
+                print "is short"
+                date=datetime.datetime.now()
                 message_list=["si e' verificato un errore : "+ "url gia' assegnato"]
-                resp = formats.CodeJson(message_list,date,True,"1",num_of_shorts())
-                json_object = resp.serializeJson()
-                return json_object
+                json = formats.Response(message_list,date,True,"1",num_of_shorts())
+                resp = json.serializeJson()
+                return resp
             
             else:
-                urlbox=UrlBox()
-                if isReciclableCustum(url_shortato):
-                    query = db.Query(UrlBox).filter('shorted_url = ', url_shortato ).filter('active = ' , False)
-                    urlbox = query.fetch(1)[0]
-                    urlbox.shorted_url = url_shortato 
-                    urlbox.date=time.mktime(time.localtime())
-                    urlbox.active = True
-                    db.put(urlbox)     
-                    message_list=[urlbox.shorted_url]
-                    resp = formats.CodeJson(message_list,urlbox.date,False,"0",num_of_shorts())
-                    json_object = resp.serializeJson()
-                    return json_object
+                print "is_not_short"
+                if isReciclableCustum(url_shortato):    
+                    message_list=[url_shortato]
+                    json = formats.Response(message_list,datetime.datetime.now,False,"0",num_of_shorts())
+                    resp = json.serializeJson()
+                    return resp
                 else:
-                    urlbox.domain = forcedGetDomain(domain_name)
-                    urlbox.url = url 
-                    urlbox.shorted_url=url_shortato
-                    urlbox.date=time.mktime(time.localtime())
-                    urlbox.active = True
-                    db.put(urlbox)
-                    message_list=[urlbox.shorted_url]
-                    resp = formats.CodeJson(message_list,urlbox.date,False,"0",num_of_shorts())
-                    json_object = resp.serializeJson()
-                    return json_object
+                    insertInUrlbox(domain,url,url_shortato)
+                    message_list=[url_shortato]
+                    json = formats.Response(message_list,datetime.datetime.now,False,"0",num_of_shorts())
+                    resp = json.serializeJson()
+                    return resp
         except:
             error = str(sys.exc_info()[0])
-            date=time.mktime(time.localtime())
+            date=datetime.datetime.now()
             message_list=["si e' verificato un errore : "+str(error)]
-            resp = formats.CodeJson(message_list,date,True,"0",num_of_shorts())
-            json_object = resp.serializeJson()
-            return json_object
+            json = formats.Response(message_list,date,True,"0",num_of_shorts())
+            resp = json.serializeJson()
+            return resp
     else:
-        # TODO core_classic
+        # TODO core_classic test pass
         try :
-            mydomain="www.cerbero.it"
-            domain_name = computeDomain(url)
-            is_recycle=isReciclable(domain_name)
+            #move this block
+            if already_shorted(url):
+                urlBox = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True).get()
+                message_list=[]
+                message_list.append(urlBox.shorted_url)
+                json = formats.Response(message_list,urlBox.date,False,"0",num_of_shorts())
+                resp = json.serializeJson()
+                return resp
+            #end move
+            is_recycle=isReciclable(domain)
             if is_recycle:
-                shorted = recycle(domain_name,url)
+                shorted = recycle(domain,url)
                 message_list=[]
                 message_list.append(shorted[0])
-                resp = formats.CodeJson(message_list,shorted[1],False,"0",num_of_shorts())
-                json_object = resp.serializeJson()
-                return json_object
+                json = formats.Response(message_list,shorted[1],False,"0",num_of_shorts())
+                resp = json.serializeJson()
+                return resp
             else:
-                shorted = bind(domain_name,mydomain) 
-                url_shortato = mydomain+domain_name+shorted
-                urlbox=UrlBox()
-                urlbox.domain = domain_name
-                urlbox.url = url 
-                urlbox.shorted_url=url_shortato
-                urlbox.date=time.mktime(time.localtime())
-                urlbox.active = True
-                db.put(urlbox)
+                shorted = bind(domain_name,mydomain)
+                url_shortato = mydomain+"/"+domain_name+"/"+shorted
+                insertInUrlbox(domain,url,url_shortato)
                 message_list=[]
-                message_list.append(urlbox.shorted_url)  
-                resp = formats.CodeJson(message_list,urlbox.date,False,"0",num_of_shorts())
-                json_object = resp.serializeJson()
-                return json_object
+                message_list.append(url_shortato)  
+                date = datetime.datetime.now()
+                json = formats.Response(message_list,date,False,"0",num_of_shorts())
+                resp = json.serializeJson()
+                return resp
         except:
             error = str(sys.exc_info()[0])
-            date=time.mktime(time.localtime())
+            date=datetime.datetime.now()
             message_list=["si e' verificato un errore : "+str(error)] 
-            resp = formats.CodeJson(message_list,date,True,"1",num_of_shorts())
-            json_object = resp.serializeJson()
-            return json_object  
+            json = formats.Response(message_list,date,True,"1",num_of_shorts())
+            resp = json.serializeJson()
+            return resp  
+        
+        
+def insertInUrlbox(domain,url,url_shortato):
+    urlbox=UrlBox()
+    urlbox.domain = domain
+    urlbox.url = url 
+    urlbox.shorted_url=url_shortato
+    urlbox.date=datetime.datetime.now()
+    urlbox.active = True
+    urlbox.last_click=datetime.datetime.now()
+    db.put(urlbox)
+    return True 
+
         
 def forcedGetDomain(domain_s):
     """
     check in the instance of the specific domain is saved . 
-    If yes return a istance of domain, if no save a istance an retrun it 
+    If yes return a istance of domain, if no save a instance an return it 
     
     Params
         domain - the domain to have instace: string
+        domain_service - the name of our domain to provide service : strig
+                         for the most important sites 
     
     Return
         an istance of domain object : Domain 
     
     """
-    query = db.Query(Domain).filter('name_domain = ', domain_s)
+    query = db.Query(Domain).filter('name_domain = ',domain_s)
     result = query.get()
     domain = Domain()
     if result == None :
@@ -138,107 +149,6 @@ def forcedGetDomain(domain_s):
     return domain 
     
         
-    
-"""
-def core_classic(url):
-    '''
-    '''
-    try :
-        if isShorted(url):
-            du=UrlBox()
-            query = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True)
-            du = query.fetch(1)[0]
-            #shorted = du.shorted_url
-            message_list=[]
-            message_list.append(du.shorted_url)
-            resp = formats.CodeJson(message_list,du.date,False,"0",num_of_shorts())
-            json_object = resp.serializeJson()
-            return json_object
-         
-        else:
-            mydomain="www.cerbero.it"
-            dominio = computeDomain(url)
-            is_recycle=isReciclable(dominio)
-            if is_recycle:
-                shorted = recycle(dominio,url)
-                message_list=[]
-                message_list.append(shorted[0])
-                resp = formats.CodeJson(message_list,shorted[1],False,"0",num_of_shorts())
-                json_object = resp.serializeJson()
-                return json_object
-            else:
-                shorted = bind(dominio,mydomain) 
-                url_shortato = mydomain+dominio+shorted
-                dt=UrlBox()
-                dt.domain = dominio
-                dt.url = url 
-                dt.shorted_url=url_shortato
-                dt.date=time.mktime(time.localtime())
-                dt.active = True
-                db.put(dt)
-                message_list=[]
-                message_list.append(dt.shorted_url)  
-                resp = formats.CodeJson(message_list,dt.date,False,"0",num_of_shorts())
-                json_object = resp.serializeJson()
-                return json_object
-    except:
-        error = str(sys.exc_info()[0])
-        date=time.mktime(time.localtime())
-        message_list=["si e' verificato un errore : "+str(error)] 
-        resp = formats.CodeJson(message_list,date,True,"1",num_of_shorts())
-        json_object = resp.serializeJson()
-        return json_object  
-
-"""
-"""    
-def core_custum(url,user_url):
-    '''
-    '''
-    try : 
-        mydomain="www.cerbero.it/"
-        dominio = computeDomain(url)
-        url_shortato = mydomain+dominio+"_"+user_url    
-        if isAlredyCustum(url_shortato):
-            date=time.mktime(time.localtime())
-            message_list=["si e' verificato un errore : "+ "url gia' assegnato"]
-            resp = formats.CodeJson(message_list,date,True,"1",num_of_shorts())
-            json_object = resp.serializeJson()
-            return json_object
-            
-        else:
-            dt=UrlBox()
-            if isReciclableCustum(url_shortato):
-                query = db.Query(UrlBox).filter('shorted_url = ', url_shortato ).filter('active = ' , False)
-                dt = query.fetch(1)[0]
-                dt.shorted_url = url_shortato 
-                dt.date=time.mktime(time.localtime())
-                dt.active = True
-                db.put(dt)     
-                message_list=[dt.shorted_url]
-                resp = formats.CodeJson(message_list,dt.date,False,"0",num_of_shorts())
-                json_object = resp.serializeJson()
-                return json_object
-            else:
-                dt.domain = dominio
-                dt.url = url 
-                dt.shorted_url=url_shortato
-                dt.date=time.mktime(time.localtime())
-                dt.active = True
-                db.put(dt)
-                message_list=[dt.shorted_url]
-                resp = formats.CodeJson(message_list,dt.date,False,"0",num_of_shorts())
-                json_object = resp.serializeJson()
-                return json_object
-                
-    except:
-        error = str(sys.exc_info()[0])
-        date=time.mktime(time.localtime())
-        message_list=["si e' verificato un errore : "+str(error)]
-        resp = formats.CodeJson(message_list,date,True,"0",num_of_shorts())
-        json_object = resp.serializeJson()
-        return json_object
-
-"""
 def get_shorts(domain, limit, offset=0):
     '''Retrieve shorted urls for a certain domain.
     
@@ -312,6 +222,11 @@ def isReciclableCustum(shorted_url):
     '''
     query = db.Query(UrlBox).filter('shorted_url = ',shorted_url).filter('active = ', False)
     if query.count()>0:
+        urlbox = query.get()
+        urlbox.shorted_url = shorted_url 
+        urlbox.date=datetime.datetime.now()
+        urlbox.active = True
+        db.put(urlbox)     
         return True
     else:
         return False
@@ -336,11 +251,18 @@ def isReciclable(dominio):
     
 def isAlredyCustum(shorted_url):
     '''
+    check if a string is alredy use for shorted_url 
+    
+    Params 
+        shorted_url - a shorted_url : string
+    
+    Return 
+        boolean - true if is used
+    
     '''
     query = db.Query(UrlBox).filter('shorted_url = ', shorted_url ).filter('active = ' , True )
     if query.count()>0:
         return True
-    
     else :
         return False
     
@@ -356,17 +278,16 @@ def recycle(dominio,url):
     Return 
         info - a list who contain shorted url and date for response
     '''
-    dt=UrlBox()
-    query = db.Query(UrlBox).filter('domain = ',dominio ).filter('active = ', False)
-    dt = query.fetch(1)[0]
-    dt.active=True
-    dt.url = url
-    dt.date = time.mktime(time.localtime())
-    shorted = dt.shorted_url
-    db.put(dt)
+    urlbox=UrlBox()
+    urlbox = db.Query(UrlBox).filter('domain = ',dominio ).filter('active = ', False).get()
+    urlbox.active = True  
+    urlbox.url = url
+    urlbox.date = datetime.datetime.now()
+    shorted = urlbox.shorted_url
+    db.put(urlbox)
     info=[]
-    info[0]=shorted
-    info[1]= dt.date
+    info.append(shorted)
+    info.append(urlbox.date)
     return info
     
 def getRealUrl(shorted_url):
@@ -380,7 +301,7 @@ def getRealUrl(shorted_url):
         url - the real url to redirect
     """
     du=UrlBox()
-    query = db.Query(UrlBox).filter('shorted_url = ',shorted_url )
+    query = db.Query(UrlBox).filter('shorted_url = ',shorted_url).filter('active = ', True)
     du = query.fetch(1)[0]
     #du.last_click=time.mktime(time.localtime())
     db.put(du) 
@@ -448,10 +369,23 @@ def cancel(url_short):
             dt = query.fetch(1)[0]
             dt.active=False
             db.put(dt)
+            return True
         else:
-            print "attenzione"
-            print "errore url non presente"
+            return False
     except:
         error = str(sys.exc_info()[0])
         print error
 
+def getDomainService(name_domain):
+    '''
+    grab the name of domain service to build a shorted url
+    
+    Params 
+        name_domain - a valid name of domain : string 
+    
+    Return 
+        domain - the association name of server : string    
+        
+    '''
+    domain = db.Query(Domain).filter('name_domain = ',name_domain).get()
+    return domain.shorted_name

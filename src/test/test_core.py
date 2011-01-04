@@ -10,6 +10,7 @@ from google.appengine.ext  import db
 from core.core import compute_next, grammar
 from core.models import UrlBox, Domain, WhiteList
 from core.whitelist import checkInWhite, modifyNote, insertInWhite, cancelInWhite
+from core.formats import Response, DecodeJson
 from core import functions 
 
 from conftest import datastore # TODO non è proprio elegante...
@@ -23,7 +24,6 @@ def test_next():
 
 def test_is_short():
     datastore.Clear()
-    
     u = UrlBox()
     u.shorted_url = 'http://test_fixture.ext'
     u.url = 'http://another_test_fixture/'
@@ -105,7 +105,7 @@ def test_get_real_url():
     u = UrlBox()
     u.shorted_url="http://test_fixture"
     u.url="http://www.the_gambit.it/test"
-    u.active = False
+    u.active = True
     u.domain = dom
     db.put(u)
     assert functions.getRealUrl( u.shorted_url)=="http://www.the_gambit.it/test"
@@ -123,6 +123,68 @@ def test_compute_domain():
     assert functions.computeDomain(test)==u"the_gambit.it"
     assert functions.computeDomain(test2)==u"wolverine"
 
+
+def test_get_domain_service():
+    datastore.Clear()
+    dom=Domain(name_domain = u"wolverine.it",shorted_name = u"cerbero.it")
+    db.put(dom)
+    assert functions.getDomainService(dom.name_domain)==u"cerbero.it"
+    assert functions.getDomainService(dom.name_domain)!=u"pippo.it"
+    
+def test_cancel():
+    datastore.Clear()
+    domain=Domain(name_domain = u"wolverine.it",shorted_name = u"cerbero.it")
+    db.put(domain)
+    urlBox =UrlBox(url="http://www.woverine.it/test",shorted_url="http://cerbero.it/_AA")
+    urlBox.active = True
+    urlBox.domain = domain
+    db.put(urlBox)
+    assert functions.cancel(urlBox.shorted_url)==True
+    assert functions.cancel(urlBox.shorted_url)==False
+
+  
+def test_short():
+    datastore.Clear()
+    domain = Domain(name_domain = u"wolverine.it",shorted_name = u"http://www.cerbero.it",last_assignament=u"")
+    db.put(domain)
+    #test classic core pass
+    short = functions.short("http://www.wolverine.it/test/test")
+    decode  = DecodeJson(short)
+    list = decode.getMessage()
+    assert list[0]==u'http://www.cerbero.it/wolverine.it/a'
+    #test classic whit recicle pass
+    functions.cancel('http://www.cerbero.it/wolverine.it/a')
+    short = functions.short("http://www.wolverine.it/test/test")
+    decode  = DecodeJson(short)
+    list = decode.getMessage()
+    assert list[0]==u'http://www.cerbero.it/wolverine.it/a'
+    #test custum pass
+    short = functions.short("http://www.wolverine.it/abc.html","mystring")
+    decode  = DecodeJson(short)
+    list = decode.getMessage()
+    assert list[0]==u'http://www.cerbero.it/wolverine.it/mystring'
+    #test custum whit same string pass
+    short = functions.short("http://www.wolverine.it/abc.html","mystring")
+    decode  = DecodeJson(short)
+    list = decode.getMessage()
+    assert list[0]==u"si e' verificato un errore : "+ "url gia' assegnato"
+    #test custum string reciclable pass
+    functions.cancel('http://www.cerbero.it/wolverine.it/mystring')
+    short = functions.short("http://www.wolverine.it/abc.html","mystring")
+    decode  = DecodeJson(short)
+    list = decode.getMessage()
+    assert list[0]==u'http://www.cerbero.it/wolverine.it/mystring' 
+    
+
+def test_insert_in_urlbox():
+    datastore.Clear()
+    domain=Domain(name_domain = u"wolverine.it",shorted_name = u"cerbero.it")
+    db.put(domain)
+    assert functions.insertInUrlbox(domain, "http://www.wolverine.it", "http://www.cerbero.it/wolverine.it/_aa")
+
+
+
+#test session for whitelist
    
 def test_check_in_white():
     datastore.Clear()
