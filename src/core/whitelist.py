@@ -2,7 +2,7 @@ from google.appengine.ext import db
 from models import WhiteList
 from google.appengine.ext.db import NotSavedError
 
-#senza www - chiedere 
+
 def insertInWhite(domain,note=None):
     '''
     insert a domain in whitelist to omit second part  

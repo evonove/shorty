@@ -41,7 +41,6 @@ class UrlBox(db.Model):
         last_click - last time who used this short url : date   
     
     """
-    #domain = db.StringProperty(multiline=False)
     domain = db.ReferenceProperty(Domain)
     url = db.LinkProperty()
     shorted_url = db.LinkProperty()
@@ -61,7 +60,6 @@ class WhiteList(db.Model):
         note - particular notes : string   
     
     """
-    #domain = db.StringProperty(multiline=False)
     domain = db.ReferenceProperty(Domain)
     note = db.StringProperty(multiline=False)
   
@@ -77,7 +75,6 @@ class BlackListShorty(db.Model):
         note - particular notes : string   
     
     """
-    #domain = db.StringProperty(multiline=False)
     domain = db.ReferenceProperty(Domain)
     note = db.StringProperty(multiline=False)
   
@@ -95,10 +92,20 @@ class User(db.Model):
   
     user_name = db.StringProperty(multiline=False)
     password = db.StringProperty(multiline=False)
-    
+
+""" 
+non piu' necessaria gestisco black list    
 class Settings(db.Model):
-    check_valid = db.BooleanProperty(default=False)
+     
+        this class contain settings 
     
+    Fields
+    
+        check_valid - to control if a link is exist : boolean    
+    
+      
+    check_valid = db.BooleanProperty(default=False)
+"""    
 
        
 

@@ -113,6 +113,19 @@ def short(url,custom_string=None):
         
         
 def insertInUrlbox(domain,url,url_shortato):
+    """
+     Insert a UrlBox record in Db
+    
+    Params
+        domain - a valid domain : domain
+        url - the url to shorten: url
+        url_shortato - the shorted url : url
+    
+    Return
+        True if is insert, False otherwise : Boolean
+    
+    """
+    
     urlbox=UrlBox()
     urlbox.domain = domain
     urlbox.url = url 
@@ -143,6 +156,7 @@ def forcedGetDomain(domain_s):
     domain = Domain()
     if result == None :
         domain.name_domain=domain_s
+        domain.shorted_name = "www.cerbero.it"
         db.put(domain)
     else : 
         domain = query.fetch(1)[0] 
@@ -212,13 +226,13 @@ def already_shorted(url):
 
 def isReciclableCustum(shorted_url):
     '''
-    check if a shorted_url produced by core custom is reciclable
+    check if a shorted_url produced by core custom is reciclable, and if is True provide to Recicle
     
     Params 
-        shorted_url - a shorted url
+        shorted_url - a shorted url : url
     
     Return 
-        boolean - true if is possible to recicle
+        boolean value - true if is possible to recicle : boolean 
     '''
     query = db.Query(UrlBox).filter('shorted_url = ',shorted_url).filter('active = ', False)
     if query.count()>0:
@@ -303,7 +317,6 @@ def getRealUrl(shorted_url):
     du=UrlBox()
     query = db.Query(UrlBox).filter('shorted_url = ',shorted_url).filter('active = ', True)
     du = query.fetch(1)[0]
-    #du.last_click=time.mktime(time.localtime())
     db.put(du) 
     return du.url
 

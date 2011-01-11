@@ -6,14 +6,21 @@ from core import compute_next
 
 
 def bind(domain_s,mydomain):
-    ''' 
+     
+    """
+    Calcolate and save in db the last assignament valid to short classic 
     
-    '''    
-    last_assignament = ''
+    Params
+        domain_s - a domain : string
+        mydomain - a domain who provide the service : string
     
-    #dt=DomainTable()
-    #domain = Domain()
-    #query = db.Query(DomainTable).filter('domain = ',domain)
+    Return
+        last assignament : string 
+    
+    """
+        
+    last_assignament = ''   
+
     query = db.Query(Domain).filter('name_domain = ', domain_s)
     if query.count() != 0:
         dt = query.fetch(1)[0]
@@ -25,7 +32,7 @@ def bind(domain_s,mydomain):
         if not functions.isAlredyCustum(short):
             break
     
-    #dt.domain = domain_s
+
     dt.last_assignament = last_assignament
     db.put(dt)
 

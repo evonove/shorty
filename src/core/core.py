@@ -11,6 +11,14 @@ symbols = ["_","-","+"]
 grammar = letters + numbers + symbols
 
 def compute_next(previous):
+    """
+    Compute the next short tag
+    Parmas:
+        previus - previous assignament : string
+    Return:
+        valid assignament : string
+    
+    """
     if not previous:
         return grammar[0]
     
