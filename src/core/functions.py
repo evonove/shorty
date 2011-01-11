@@ -6,6 +6,7 @@ import time
 import sys
 from models import Domain, UrlBox, WhiteList
 from whitelist import checkInWhite
+from blacklist import checkInBlack
 import datetime
 
  
@@ -25,90 +26,79 @@ def short(url,custom_string=None):
     """
     domain_name = computeDomain(url)
     domain = forcedGetDomain(domain_name)
-    mydomain = domain.shorted_name
     
-    
-    """ 
-        this block is valid for the core classic only 
-        if already_shorted(url):
-            print "alredy"
-            urlBox = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True).get()
-            message_list=[]
-            message_list.append(urlBox.shorted_url)
-            json = formats.Response(message_list,urlBox.date,False,"0",num_of_shorts())
-            resp = json.serializeJson()
-            return resp
-    """
-  
-    
-    if custom_string:
-        try :         
-            url_shortato = mydomain+"/"+domain_name+"/"+custom_string 
-            print url_shortato
-            if is_short(url_shortato):
-                print "is short"
-                date=datetime.datetime.now()
-                message_list=["si e' verificato un errore : "+ "url gia' assegnato"]
-                json = formats.Response(message_list,date,True,"1",num_of_shorts())
-                resp = json.serializeJson()
-                return resp
-            
-            else:
-                print "is_not_short"
-                if isReciclableCustum(url_shortato):    
-                    message_list=[url_shortato]
-                    json = formats.Response(message_list,datetime.datetime.now,False,"0",num_of_shorts())
+    if checkInBlack(domain) :
+        date=datetime.datetime.now()
+        message_list=["si e' verificato un errore : "+ "dominio Proibito"]
+        json = formats.Response(message_list,date,True,"1",num_of_shorts())
+        resp = json.serializeJson()
+        return resp
+    else :
+        mydomain = domain.shorted_name
+        if custom_string:
+            try :         
+                url_shortato = mydomain+"/"+domain_name+"/"+custom_string 
+                if is_short(url_shortato):
+                    date=datetime.datetime.now()
+                    message_list=["si e' verificato un errore : "+ "url gia' assegnato"]
+                    json = formats.Response(message_list,date,True,"1",num_of_shorts())
                     resp = json.serializeJson()
                     return resp
                 else:
-                    insertInUrlbox(domain,url,url_shortato)
-                    message_list=[url_shortato]
-                    json = formats.Response(message_list,datetime.datetime.now,False,"0",num_of_shorts())
+                    if isReciclableCustum(url_shortato):    
+                        message_list=[url_shortato]
+                        json = formats.Response(message_list,datetime.datetime.now,False,"0",num_of_shorts())
+                        resp = json.serializeJson()
+                        return resp
+                    else:
+                        insertInUrlbox(domain,url,url_shortato)
+                        message_list=[url_shortato]
+                        json = formats.Response(message_list,datetime.datetime.now,False,"0",num_of_shorts())
+                        resp = json.serializeJson()
+                        return resp
+            except:
+                error = str(sys.exc_info()[0])
+                date=datetime.datetime.now()
+                message_list=["si e' verificato un errore : "+str(error)]
+                json = formats.Response(message_list,date,True,"0",num_of_shorts())
+                resp = json.serializeJson()
+                return resp
+        else:
+        # TODO core_classic test pass
+            try :
+            #move this block
+                if already_shorted(url):
+                    urlBox = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True).get()
+                    message_list=[]
+                    message_list.append(urlBox.shorted_url)
+                    json = formats.Response(message_list,urlBox.date,False,"0",num_of_shorts())
                     resp = json.serializeJson()
                     return resp
-        except:
-            error = str(sys.exc_info()[0])
-            date=datetime.datetime.now()
-            message_list=["si e' verificato un errore : "+str(error)]
-            json = formats.Response(message_list,date,True,"0",num_of_shorts())
-            resp = json.serializeJson()
-            return resp
-    else:
-        # TODO core_classic test pass
-        try :
-            #move this block
-            if already_shorted(url):
-                urlBox = db.Query(UrlBox).filter('url = ',url ).filter('active = ', True).get()
-                message_list=[]
-                message_list.append(urlBox.shorted_url)
-                json = formats.Response(message_list,urlBox.date,False,"0",num_of_shorts())
-                resp = json.serializeJson()
-                return resp
             #end move
-            is_recycle=isReciclable(domain)
-            if is_recycle:
-                shorted = recycle(domain,url)
-                message_list=[]
-                message_list.append(shorted[0])
-                json = formats.Response(message_list,shorted[1],False,"0",num_of_shorts())
+                is_recycle=isReciclable(domain)
+                if is_recycle:
+                    shorted = recycle(domain,url)
+                    message_list=[]
+                    message_list.append(shorted[0])
+                    json = formats.Response(message_list,shorted[1],False,"0",num_of_shorts())
+                    resp = json.serializeJson()
+                    return resp
+                else:
+                    shorted = bind(domain_name,mydomain)
+                    url_shortato = mydomain+"/"+domain_name+"/"+shorted
+                    insertInUrlbox(domain,url,url_shortato)
+                    message_list=[]
+                    message_list.append(url_shortato)  
+                    date = datetime.datetime.now()
+                    json = formats.Response(message_list,date,False,"0",num_of_shorts())
+                    resp = json.serializeJson()
+                    return resp
+            except:
+                error = str(sys.exc_info()[0])
+                date=datetime.datetime.now()
+                message_list=["si e' verificato un errore : "+str(error)] 
+                json = formats.Response(message_list,date,True,"1",num_of_shorts())
                 resp = json.serializeJson()
-                return resp
-            else:
-                shorted = bind(domain_name,mydomain)
-                url_shortato = mydomain+"/"+domain_name+"/"+shorted
-                insertInUrlbox(domain,url,url_shortato)
-                message_list=[]
-                message_list.append(url_shortato)  
-                date = datetime.datetime.now()
-                json = formats.Response(message_list,date,False,"0",num_of_shorts())
-                resp = json.serializeJson()
-                return resp
-        except:
-            error = str(sys.exc_info()[0])
-            date=datetime.datetime.now()
-            message_list=["si e' verificato un errore : "+str(error)] 
-            json = formats.Response(message_list,date,True,"1",num_of_shorts())
-            resp = json.serializeJson()
             return resp  
         
         
@@ -306,7 +296,7 @@ def recycle(dominio,url):
     
 def getRealUrl(shorted_url):
     """
-    return the real url associated to a short url 
+    return the real url associated to a short url and increase the number of click
     
     Params 
         shorted_url - a shorted url
@@ -314,11 +304,11 @@ def getRealUrl(shorted_url):
     Return 
         url - the real url to redirect
     """
-    du=UrlBox()
-    query = db.Query(UrlBox).filter('shorted_url = ',shorted_url).filter('active = ', True)
-    du = query.fetch(1)[0]
-    db.put(du) 
-    return du.url
+    urlbox=UrlBox()
+    urlbox = db.Query(UrlBox).filter('shorted_url = ',shorted_url).filter('active = ', True).get()
+    urlbox.click+=1 
+    db.put(urlbox) 
+    return urlbox.url
 
 def cancelByPolicy(soglia):
     """

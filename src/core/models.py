@@ -18,13 +18,24 @@ class Domain(db.Model):
     shorted_name = db.StringProperty(multiline=False,default="all")
     last_assignament = db.StringProperty(multiline=False)
 
+
+class User(db.Model):
+    """ 
+        this class contain access's credentials 
+    
+    Fields
+    
+        user_name - user's name : string 
+        password -  user's password  : string   
+    
     """
-    old class
-class DomainTable (db.Model):
-    #domain = db.StringProperty(multiline=False)
-    domain = db.ReferenceProperty(Domain)
-    last_assignament = db.StringProperty(multiline=False)
-    """
+  
+    user_name = db.StringProperty(multiline=False)
+    password = db.StringProperty(multiline=False)
+
+
+
+
 
 class UrlBox(db.Model):
     """ 
@@ -47,6 +58,8 @@ class UrlBox(db.Model):
     date = db.DateTimeProperty(auto_now=True)
     active = db.BooleanProperty(default=True)
     last_click = db.DateTimeProperty()
+    click = db.IntegerProperty(default=0)
+    owner = db.ReferenceProperty(User)
 
 
 class WhiteList(db.Model):
@@ -79,19 +92,6 @@ class BlackList(db.Model):
     note = db.StringProperty(multiline=False)
   
 
-class User(db.Model):
-    """ 
-        this class contain access's credentials 
-    
-    Fields
-    
-        user_name - user's name : string 
-        password -  user's password  : string   
-    
-    """
-  
-    user_name = db.StringProperty(multiline=False)
-    password = db.StringProperty(multiline=False)
 
 """ 
 non piu' necessaria gestisco black list    
