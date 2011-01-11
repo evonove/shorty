@@ -65,7 +65,7 @@ class WhiteList(db.Model):
   
 
  
-class BlackListShorty(db.Model):
+class BlackList(db.Model):
     """ 
         this class contain all the domain who considerate dangerous
     

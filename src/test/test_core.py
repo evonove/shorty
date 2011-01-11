@@ -8,8 +8,9 @@ from google.appengine.ext  import db
 
 
 from core.core import compute_next, grammar
-from core.models import UrlBox, Domain, WhiteList
+from core.models import UrlBox, Domain, WhiteList, BlackList
 from core.whitelist import checkInWhite, modifyNote, insertInWhite, cancelInWhite
+from core.blacklist import checkInBlack, modifyNoteBlack, insertInBlack, cancelInBlack
 from core.formats import Response, DecodeJson
 from core import functions 
 
@@ -226,6 +227,50 @@ def test_camcel_in_white():
     insertInWhite(dom)
     assert cancelInWhite(dom)==True
     assert cancelInWhite(dom2)==False 
+    
+#test per BlackList
+
+def test_check_in_black():
+    datastore.Clear()
+    dom=Domain(name_domain = u"wolverine.it")
+    dom2=Domain(name_domain = u"test.it")
+    db.put(dom)
+    db.put(dom2)
+    black = BlackList()
+    black.domain = dom 
+    db.put(black)
+    assert checkInBlack(dom)==True
+    assert checkInBlack(dom2)==False
+    
+def test_modify_note_black():
+    datastore.Clear()
+    dom=Domain(name_domain = u"the_gambit.it",note = u"energia cinetica")
+    dom2 = Domain(name_domain = u"test.it")
+    db.put(dom)
+    black = BlackList()
+    black.domain = dom 
+    db.put(black)
+    assert modifyNoteBlack(dom,"energia_cinetica e solare")==True
+    assert modifyNoteBlack(dom2,"energia")==False
+    
+def test_insert_in_black():
+    dom=Domain(name_domain = u"the_gambit.it")
+    db.put(dom)
+    assert insertInBlack(dom) == True 
+    assert insertInBlack(dom,"notes") == False
+    
+def test_cancel_in_black():
+    datastore.Clear
+    dom=Domain(name_domain = u"the_gambit.it")
+    dom2 = Domain(name_domain = u"test.it")
+    db.put(dom)
+    black = BlackList()
+    black.domain = dom 
+    db.put(black)
+    insertInBlack(dom)
+    assert cancelInBlack(dom)==True
+    assert cancelInBlack(dom2)==False 
+
 
     
 
