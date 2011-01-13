@@ -4,8 +4,14 @@ Created on 07/dic/2010
 @author: masci
 '''
 import sys
+#mia
+import os 
+#
 import os.path
 import logging
+#mia aggiunta
+
+
 
 #APPENGINE_SDK = '/usr/local/google_appengine/'
 APPENGINE_SDK = '/home/matteo/Scaricati/google_appengine/'
@@ -18,6 +24,8 @@ def pytest_configure(config):
     sys.path.append(os.path.join(APPENGINE_SDK, 'lib', 'django'))
     sys.path.append(os.path.join(APPENGINE_SDK, 'lib', 'webob'))
     sys.path.append(os.path.join(APPENGINE_SDK, 'lib', 'antlr3'))
+    #ancora aggiunta mia 
+    sys.path.append(os.path.join(APPENGINE_SDK,'google','appengine','api','memcache'))
 
     # simulate we're running an app with devserver
     from google.appengine.api import apiproxy_stub_map, datastore_file_stub
@@ -30,6 +38,10 @@ def pytest_configure(config):
     datastore = datastore_file_stub.DatastoreFileStub('shortydev-app', None, None)
     # register the datastore stub to the proxy
     apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', datastore)
+    # for memchace -------- mio aggiunta 
+    from google.appengine.api.memcache import memcache_stub
+    apiproxy_stub_map.apiproxy.RegisterStub('memcache', memcache_stub.MemcacheServiceStub())
+    
 
 def pytest_unconfigure(config):    
     """Since GAE seems to not gracefully close its logger handler, do it by

@@ -2,6 +2,7 @@ import os
 import core.functions as core
 import core.formats as formats
 from api.handlers import ShortHandler, ExpandHandler
+from shield import Shield
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -33,6 +34,8 @@ class Result(webapp.RequestHandler):
         methods = self.request.get('core')
         url = self.request.get('url')
         pers = self.request.get('custom_hash')
+        remoteip = self.request.remote_addr       
+        """
         
         challenge = self.request.get('recaptcha_challenge_field')
         response  = self.request.get('recaptcha_response_field')
@@ -41,7 +44,13 @@ class Result(webapp.RequestHandler):
         cResponse = captcha.submit(challenge,response,"6LfAO78SAAAAANHiQxEObRo36llHrkQa3kauMaD3",remoteip)
 
         list_url="Errore"
-        if cResponse.is_valid:
+        """
+        #if cResponse.is_valid:
+        shield = Shield(remoteip)
+        information = shield.control()
+        for i in information :
+            print i 
+        if shield.getShieldSentence()==False:
                 try :
                     if url[0:7]!="http://":
                         url ="http://"+url
@@ -63,7 +72,8 @@ class Result(webapp.RequestHandler):
                         res = "Indirizzo non valido"
                         list_url = res
         else:
-            list_url = cResponse.error_code
+            #list_url = cResponse.error_code
+            list_url = "Errore Numero tentativi orari superati"
 
                 
         template_values = {
