@@ -47,9 +47,6 @@ class Result(webapp.RequestHandler):
         """
         #if cResponse.is_valid:
         shield = Shield(remoteip)
-        information = shield.control()
-        for i in information :
-            print i 
         if shield.getShieldSentence()==False:
                 try :
                     if url[0:7]!="http://":

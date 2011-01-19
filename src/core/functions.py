@@ -4,6 +4,7 @@ from urlparse import urlparse
 import formats
 import time
 import sys
+
 from models import Domain, UrlBox, WhiteList
 from whitelist import checkInWhite
 from blacklist import checkInBlack
@@ -96,7 +97,7 @@ def short(url,custom_string=None):
             except:
                 error = str(sys.exc_info()[0])
                 date=datetime.datetime.now()
-                message_list=["si e' verificato un errore : "+str(error)] 
+                message_list=["si e' verificato un errore in short : "+str(error)] 
                 json = formats.Response(message_list,date,True,"1",num_of_shorts())
                 resp = json.serializeJson()
             return resp  
@@ -119,8 +120,8 @@ def insertInUrlbox(domain,url,url_shortato):
     urlbox=UrlBox()
     urlbox.domain = domain
     urlbox.url = url 
-    urlbox.shorted_url=url_shortato
-    urlbox.date=datetime.datetime.now()
+    urlbox.shorted_url=db.Link(url_shortato)
+    urlbox.date=datetime.datetime.now()        
     urlbox.active = True
     urlbox.last_click=datetime.datetime.now()
     db.put(urlbox)
@@ -247,7 +248,7 @@ def isReciclable(dominio):
         boolean - true if is possible to recicle
     
     '''
-    query = db.Query(UrlBox).filter('domain = ',dominio ).filter('active = ', False)
+    query = db.Query(UrlBox).filter('domain = ',dominio).filter('active = ', False)
     if query.count()>0:
         return True
     else:

@@ -5,6 +5,7 @@ Created on 30/nov/2010
 @author: masci
 '''
 from google.appengine.ext  import db
+import sys
 
 
 from core.core import compute_next, grammar
@@ -181,7 +182,12 @@ def test_insert_in_urlbox():
     datastore.Clear()
     domain=Domain(name_domain = u"wolverine.it",shorted_name = u"cerbero.it")
     db.put(domain)
-    assert functions.insertInUrlbox(domain, "http://www.wolverine.it", "http://www.cerbero.it/wolverine.it/_aa")
+    #try :
+    ris = functions.insertInUrlbox(domain, "http://www.wolverine.it", "http://www.cerbero.it/wolverine.it/_aa")
+    assert ris == True
+    # except :
+    #    print "errore: " 
+    #    print  str(sys.exc_info()[0])
 
 
 
