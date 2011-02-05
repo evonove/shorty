@@ -89,7 +89,7 @@ class Resolve(webapp.RequestHandler):
             dominio = "www.cerbero.it"
             sub = url[21:len(url)]
             red = dominio + sub
-            normal_url=core.getRealUrl(red)
+            normal_url=core.expand(red)
             self.redirect(normal_url)              
         except:
             self.error(500)

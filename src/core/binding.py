@@ -5,10 +5,10 @@ import functions
 from core import compute_next
 
 
-def bind(domain_s,mydomain):
+def bind(domain_string, mydomain):
      
     """
-    Calcolate and save in db the last assignament valid to short classic 
+    Calculate and save in db the last assignment valid to short classic 
     
     Params
         domain_s - a domain : string
@@ -18,17 +18,16 @@ def bind(domain_s,mydomain):
         last assignament : string 
     
     """
-        
-    last_assignament = ''   
+    last_assignment = ''   
 
-    query = db.Query(Domain).filter('name_domain = ', domain_s)
+    query = db.Query(Domain).filter('name_domain = ', domain_string)
     if query.count() != 0:
         dt = query.fetch(1)[0]
-        last_assignament = dt.last_assignament
+        last_assignment = dt.last_assignament
         
     while True:
-        last_assignament = compute_next(last_assignament)
-        short = '/'.join( (mydomain,domain_s,last_assignament) )
+        last_assignament = compute_next(last_assignment)
+        short = '/'.join( (mydomain, domain_string, last_assignament) )
         if not functions.isAlredyCustum(short):
             break
     

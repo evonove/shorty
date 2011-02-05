@@ -3,12 +3,15 @@ Created on 07/dic/2010
 
 @author: masci
 '''
-import string
+import string, urlparse
+import settings
+from errors import InvalidURLError
 
-letters = [x for x in string.ascii_letters]
-numbers = [x for x in string.digits]
-symbols = ["_","-","+"]
-grammar = letters + numbers + symbols
+LETTERS = [x for x in string.ascii_letters]
+NUMBERS = [x for x in string.digits]
+SYMBOLS = ["_","-","+"]
+grammar = LETTERS + NUMBERS + SYMBOLS
+
 
 def compute_next(previous):
     """
@@ -35,3 +38,30 @@ def compute_next(previous):
         indexes.append(0)
 
     return ''.join(grammar[i] for i in indexes)
+
+def parse_domain(url):
+    """
+    parse a domain string from an url 
+    
+    Params 
+        url - url to parse
+    
+    Return 
+        domain name - string
+    
+    """
+    parsed = urlparse.urlparse(sanitize(url))    
+    return '.'.join(parsed.hostname.split('.')[-2:])
+
+
+def sanitize(url):
+    """Trivial checks for uniforming urls"""
+    parsed = urlparse.urlparse(url)
+    
+    if parsed.scheme not in settings.VALID_SCHEMES:
+        raise InvalidURLError(url)
+    
+    if not parsed.path:
+        url += '/'
+    
+    return url

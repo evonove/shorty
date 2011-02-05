@@ -5,88 +5,48 @@ Created on 11/gen/2011
 '''
 
 from google.appengine.ext import db
-from models import BlackList
+from models import BlackListed
 from google.appengine.ext.db import NotSavedError
 
 
-def insertInBlack(domain,note=None):
+def blacklist(domain_name):
     '''
-    insert a domain in Blacklist . This domain not be shortered   
+    blacklist a domain   
     
     Params 
-        domain - a valid domain : Domain 
-        note - a note : string
+        domain_name - a valid domain name: string 
     
     Return 
-        True - if is insert in whitelist otherwise False
+        None
     '''
-    insertIntoBlack = db.Query(BlackList).filter('domain = ', domain).count()
-    if not insertIntoBlack:
-        black = BlackList()
-        black.domain=domain
-        black.note = note
-        db.put(black)
-        insertIntoBlack = True
-    else : 
-        insertIntoBlack= False
-    return insertIntoBlack
-    
-def cancelInBlack(domain):
-    '''
-    cancel a domain in blacklist   
-    
-    Params 
-        domain - a valid domain : Domain 
-    
-    Return 
-        True - if is cancel to whitelist otherwise False
-    '''
-    black_element=None
-    is_delete = False
-    try :
-        black_element = db.Query(BlackList).filter('domain = ', domain ).get()
-    except NotSavedError:
-        pass
-    if black_element:
-        db.delete(black_element)
-        is_delete = True
-    return is_delete
+    bl = BlackListed(domain_name=domain_name)
+    bl.put()
 
-def modifyNoteBlack(domain,note):
+
+def unblacklist(domain_name):
     '''
-    Modify the notes to  a domain in BlackList  
+    remove blacklisted status for a domain   
     
     Params 
-        domain - a valid domain : Domain 
-        note - a note : string
+        domain - a valid domain name: string 
     
     Return 
-        True - if is update in whitelist otherwise False
+        None
     '''
-    black_element = None
-    modifiedNote = False     
-    try : 
-        black_element = db.Query(BlackList).filter('domain = ', domain ).get()
-    except NotSavedError:
-        pass
-    if black_element:
-        black_element.note = note
-        modifiedNote = db.put(black_element).id() > 0
-    return modifiedNote == True
+    black_domain = db.Query(BlackListed).filter('domain_name = ', domain_name).get()
+    if black_domain:
+        db.delete(black_domain)
 
-def checkInBlack(domain):
+
+def is_blacklisted(domain_string):
     '''
-    control if a domain  is in BlackList  
+    control if a domain string is BlackListed  
     
     Params 
-        domain - a valid domain : Domain 
+        domain string: string 
     
     Return 
         True - if the domain is in BlackList otherwise False
     '''
-    check = db.Query(BlackList).filter('domain = ', domain).count()
-    if check >0:
-        return True
-    else:
-        return False
-    
+    entry = db.Query(BlackListed).filter('domain_name = ', domain_string).get()
+    return entry is not None

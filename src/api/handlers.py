@@ -28,7 +28,15 @@ class ExpandHandler(webapp.RequestHandler):
             dominio = "www.cerbero.it"
             sub = url[21:len(url)]
             red = dominio + sub
-            normal_url=core.getRealUrl(red)
+            normal_url=core.expand(red)
             self.redirect(normal_url)              
         except:
             self.error(500)
+"""
+    if checkInBlack(domain) :
+        date=datetime.datetime.now()
+        message_list=["si e' verificato un errore : "+ "dominio Proibito"]
+        json = formats.Response(message_list,date,True,"1",num_of_shorts())
+        resp = json.serializeJson()
+        return resp
+"""

@@ -13,8 +13,8 @@ import logging
 
 
 
-#APPENGINE_SDK = '/usr/local/google_appengine/'
-APPENGINE_SDK = '/home/matteo/Scaricati/google_appengine/'
+APPENGINE_SDK = '/usr/local/google_appengine/'
+#APPENGINE_SDK = '/home/matteo/Scaricati/google_appengine/'
 APPLICATION_ID = 'shortydev-app'
 datastore = None
 
